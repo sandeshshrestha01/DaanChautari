@@ -1,0 +1,226 @@
+body{
+    margin:0;
+    font-family:'Poppins',sans-serif;
+    background:#f5f5f5;
+}
+
+.container{
+    display:flex;
+    min-height:100vh;
+}
+
+/* LEFT SIDE */
+.left{
+    flex:1;
+    background:linear-gradient(135deg,#2e7d32,#1b5e20);
+    color:white;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    padding:50px;
+}
+
+.yellow-text {
+    color: #f9a825;
+}
+
+.left h1{
+    font-size:3rem;
+    margin-bottom:15px;
+}
+
+.left p{
+    font-size:1.1rem;
+    opacity:0.9;
+}
+
+/* RIGHT SIDE */
+.form-box{
+    flex:1;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#fff;
+    padding-top:90px;
+}
+
+.form{
+    width:100%;
+    max-width:400px;
+    display:flex;
+    flex-direction:column;
+}
+
+.form h2{
+    text-align:left;
+    margin-bottom:4px;
+    color:#1b5e20;
+    font-size:1.6rem;
+    margin-top:4px;
+}
+
+/* GET STARTED label */
+.form-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #e0a800;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 2px;
+}
+
+/* Labeled input groups */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+}
+
+.form-group label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.form input,
+.form select{
+    padding:10px 12px;
+    margin-bottom:0px;
+    border:1px solid #ddd;
+    border-radius:8px;
+    outline:none;
+    font-size: 0.9rem;
+    background: #fafafa;
+    transition: border-color 0.2s;
+}
+
+.form input:focus,
+.form select:focus{
+    border-color:#2e7d32;
+    background:#fff;
+}
+
+/* Role toggle (Donor / Recipient) */
+.role-toggle {
+    display: flex;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f5f5f5;
+}
+
+.role-toggle input[type="radio"] {
+    display: none;
+}
+
+.role-btn {
+    flex: 1;
+    text-align: center;
+    padding: 9px 12px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #555;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    user-select: none;
+    margin: 0;
+}
+
+.role-toggle input[type="radio"]:checked + .role-btn {
+    background: #2e7d32;
+    color: #fff;
+}
+
+/* Terms checkbox row */
+.form-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.form-check input[type="checkbox"] {
+    margin-top: 2px;
+    width: 14px;
+    height: 14px;
+    accent-color: #2e7d32;
+    flex-shrink: 0;
+    padding: 0;
+    border: none;
+}
+
+.form-check label {
+    font-size: 0.8rem;
+    color: #555;
+    line-height: 1.4;
+    cursor: pointer;
+}
+
+.form button{
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    background:#2e7d32;
+    color:white;
+    cursor:pointer;
+    font-size:16px;
+}
+
+.form button:hover{
+    background:#1b5e20;
+}
+
+.form p{
+    text-align:center;
+    margin-top:15px;
+}
+
+.form a{
+    color:#f9a825;
+    text-decoration:none;
+    font-weight:600;
+}
+
+.form a:hover{
+    text-decoration:underline;
+}
+
+/* ================= RESPONSIVE LAYOUTS ================= */
+@media (max-width: 992px) {
+  .left h1 {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+  .left {
+    min-height: 250px;
+    padding: 30px;
+  }
+  .left h1 {
+    font-size: 2rem;
+  }
+  .form-box {
+    padding: 25px;
+  }
+}
+
+@media (max-width: 576px) {
+  .left {
+    min-height: 200px;
+    padding: 20px;
+  }
+  .left h1 {
+    font-size: 1.8rem;
+  }
+  .form-box {
+    padding: 15px;
+  }
+}
