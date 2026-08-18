@@ -3,13 +3,43 @@
 
 /*----- ROOT VARIABLES -----*/
 :root {
-  --primary-green: #2e7d32;
-  --dark-green: #1b5e20;
+  /* Primary & Brand Colors */
+  --primary-green: #1f472c;
+  --dark-green: #1f472c;
   --primary-yellow: #f9a825;
   --light-green: #b6cfb9;
+  --accent-green: #2e7d32;
+  --footer-dark-green: #0e1f10;
+
+  /* Neutral & Base Colors */
   --white: #ffffff;
-  --shadow: rgba(0,0,0,0.1);
-  --text-color: #333;
+  --body-bg: #fafafa;
+  --light-bg: #f8faf8;
+  --card-bg: #ffffff;
+  --text-color: #1a1a1a;
+  --text-dark: #333333;
+  --text-muted: #595959;
+  --text-light: #444444;
+  --border-color: #e0e0e0;
+  --divider-color: #eeeeee;
+
+  /* Accent & Status Colors */
+  --role-badge-bg: #bbdefb;
+  --role-badge-text: #0a3472;
+  --chip-bg: #f1f8e9;
+  --chip-border: #c8e6c9;
+  --chip-hover-bg: #e8f5e9;
+  --chip-role-text: #3a6117;
+  --danger-color: #d32f2f;
+  --danger-hover: #c62828;
+  --danger-bg: #ffebee;
+  --pill-bg: #e0e0e0;
+  --footer-text: #b8c8b8;
+  --footer-subtext: #8fa88f;
+
+  /* Shadows */
+  --shadow: rgba(0, 0, 0, 0.1);
+  --shadow-sm: rgba(0, 0, 0, 0.05);
 }
 
 /*----- RESET -----*/
@@ -21,7 +51,7 @@
 }
 
 body {
-  background-color: #fafafa;
+  background-color: var(--body-bg);
   color: var(--text-color);
   font-size: 16px;
   line-height: 1.6;
@@ -39,16 +69,16 @@ html {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--light-bg);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #ccc;
+  background: var(--light-green);
   border-radius: 30px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #bbb;
+  background: var(--primary-green);
 }
 
 /* ================= NAVBAR ================= */
@@ -139,15 +169,13 @@ html {
 
 .user-role-badge {
   font-size: 11px;
-  background: #e3f2fd;
-  color: #0d47a1;
+  background: var(--role-badge-bg);
+  color: var(--role-badge-text);
   padding: 2px 6px;
   border-radius: 12px;
   margin-left: 5px;
   text-transform: uppercase;
 }
-
-
 
 /* ================= AUTH (RIGHT SIDE) ================= */
 .auth-buttons {
@@ -182,7 +210,7 @@ html {
   display: inline-block;
   padding: 8px 14px;
   background: var(--primary-green);
-  color: white;
+  color: var(--white);
   border: none;
   border-radius: 999px;
   cursor: pointer;
@@ -198,13 +226,13 @@ html {
 
 /* Logout button variant */
 .logout-btn {
-  border-color: #d32f2f;
-  color: #d32f2f;
+  border-color: var(--danger-color);
+  color: var(--danger-color);
 }
 
 .logout-btn:hover {
-  background: #d32f2f;
-  color: white;
+  background: var(--danger-color);
+  color: var(--white);
 }
 
 /* ================= MOBILE MENU BUTTON ================= */
@@ -250,7 +278,7 @@ html {
     top: 70px;
     left: 0;
     right: 0;
-    background: white;
+    background: var(--white);
     flex-direction: column;
     align-items: center;
     max-height: 0;
@@ -315,8 +343,8 @@ html {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #f1f8e9;
-  border: 1px solid #c8e6c9;
+  background: var(--chip-bg);
+  border: 1px solid var(--chip-border);
   padding: 6px 14px;
   border-radius: 999px;
   cursor: pointer;
@@ -327,8 +355,8 @@ html {
 }
 
 .profile-chip:hover {
-  background: #e8f5e9;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  background: var(--chip-hover-bg);
+  box-shadow: 0 2px 8px var(--shadow-sm);
 }
 
 .profile-chip .avatar {
@@ -336,7 +364,7 @@ html {
   height: 32px;
   border-radius: 50%;
   background: var(--primary-green);
-  color: white;
+  color: var(--white);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -344,7 +372,7 @@ html {
   font-size: 14px;
   overflow: hidden;
   border: 1.5px solid var(--white);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px var(--shadow);
 }
 
 .profile-chip .avatar img {
@@ -361,14 +389,14 @@ html {
 
 .profile-chip .role {
   font-size: 10.5px;
-  color: #558b2f;
-  font-weight: 500;
+  color: var(--chip-role-text);
+  font-weight: 600;
   text-transform: capitalize;
 }
 
 .profile-chip .chevron {
   transition: transform 0.3s ease;
-  color: #558b2f;
+  color: var(--chip-role-text);
 }
 
 /* Open state for chevron */
@@ -383,8 +411,8 @@ html {
   right: 0;
   background: var(--white);
   border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-  border: 1px solid #e0e0e0;
+  box-shadow: 0 10px 25px var(--shadow);
+  border: 1px solid var(--border-color);
   width: 240px;
   z-index: 1000;
   opacity: 0;
@@ -402,19 +430,19 @@ html {
 
 .profile-dropdown-head {
   padding: 16px 20px;
-  background: #f9fbf9;
-  border-bottom: 1px solid #eee;
+  background: var(--light-bg);
+  border-bottom: 1px solid var(--divider-color);
 }
 
 .profile-dropdown-head .name {
   font-size: 14.5px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-dark);
 }
 
 .profile-dropdown-head .email {
   font-size: 12px;
-  color: #777;
+  color: var(--text-muted);
   word-break: break-all;
 }
 
@@ -423,7 +451,7 @@ html {
   align-items: center;
   gap: 12px;
   padding: 12px 20px;
-  color: #444;
+  color: var(--text-color);
   text-decoration: none;
   font-size: 13.5px;
   font-weight: 500;
@@ -433,12 +461,12 @@ html {
 .dropdown-item svg {
   width: 18px;
   height: 18px;
-  color: #666;
+  color: var(--text-light);
   transition: color 0.2s ease;
 }
 
 .dropdown-item:hover {
-  background: #f1f8e9;
+  background: var(--chip-bg);
   color: var(--primary-green);
 }
 
@@ -448,32 +476,83 @@ html {
 
 .dropdown-divider {
   height: 1px;
-  background: #eee;
+  background: var(--divider-color);
   margin: 4px 0;
 }
 
 .dropdown-item.logout {
-  color: #d32f2f;
+  color: var(--danger-color);
 }
 
 .dropdown-item.logout svg {
-  color: #d32f2f;
+  color: var(--danger-color);
 }
 
 .dropdown-item.logout:hover {
-  background: #ffebee;
-  color: #c62828;
+  background: var(--danger-bg);
+  color: var(--danger-hover);
 }
 
 .dropdown-item.logout:hover svg {
-  color: #c62828;
+  color: var(--danger-hover);
+}
+
+/* ================= ROLE SWITCHER ================= */
+.role-switch-container {
+  padding: 10px 16px;
+  background: var(--light-bg);
+  border-radius: 8px;
+  margin: 6px 12px;
+}
+
+.role-switch-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.role-toggle-pill {
+  display: flex;
+  background: var(--pill-bg);
+  border-radius: 20px;
+  padding: 2px;
+  position: relative;
+  cursor: pointer;
+}
+
+.role-pill-btn {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text-light);
+  padding: 6px 10px;
+  border-radius: 18px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.role-pill-btn.active {
+  background: var(--accent-green);
+  color: var(--white);
 }
 
 /* ================= SITE FOOTER ================= */
 .site-footer {
   margin-top: 60px;
-  background-color: #0e1f10;
-  color: #f1f5f2;
+  background-color: var(--footer-dark-green);
+  color: var(--white);
   padding: 60px 20px 20px;
 }
 
@@ -508,7 +587,7 @@ html {
 .footer-col p {
   font-size: 14px;
   line-height: 1.8;
-  color: #a4b0a4;
+  color: var(--footer-text);
   margin: 0;
 }
 
@@ -521,7 +600,7 @@ html {
 .footer-col ul li {
   margin-bottom: 12px;
   font-size: 14px;
-  color: #a4b0a4;
+  color: var(--footer-text);
   display: flex;
   align-items: flex-start;
   gap: 10px;
@@ -529,7 +608,7 @@ html {
 }
 
 .footer-col ul li a {
-  color: #a4b0a4;
+  color: var(--footer-text);
   text-decoration: none;
   transition: all 0.3s ease;
   display: inline-block;
@@ -551,7 +630,7 @@ html {
   padding-top: 20px;
   text-align: center;
   font-size: 13px;
-  color: #5c635e;
+  color: var(--footer-subtext);
 }
 
 .footer-bottom p {
@@ -577,4 +656,5 @@ html {
     margin-top: 25px;
   }
 }
+
 

@@ -23,12 +23,8 @@ $town             = trim(filter_input(INPUT_POST, 'town',             FILTER_SAN
 $phone            = trim(filter_input(INPUT_POST, 'phone',            FILTER_SANITIZE_SPECIAL_CHARS) ?? '');
 $address          = trim(filter_input(INPUT_POST, 'address',          FILTER_SANITIZE_SPECIAL_CHARS) ?? '');
 
-// Role comes from the form as 'donor' or 'recipient' — map 'needy' for backward compat
-$raw_role = $_POST['role'] ?? 'donor';
-$role     = ($raw_role === 'needy') ? 'recipient' : $raw_role;
-if (!in_array($role, ['donor', 'recipient'])) {
-    $role = 'donor'; // safe default
-}
+// All new users start as 'donor'. They can switch in the dashboard.
+$role = 'donor';
 
 // ── Validate required fields ─────────────────────────────────────────────────
 if (empty($full_name) || !$email || empty($password) || empty($town) || empty($phone) || empty($address)) {
@@ -89,14 +85,10 @@ try {
     $_SESSION['user_role']  = $role;
     $_SESSION['town']       = $town;
 
-    set_flash_message('success', "Namaste $full_name! Your account has been created successfully. Welcome to Dan Chautari!");
+    set_flash_message('success', "Namaste $full_name! Your account has been created successfully. Welcome to Daan Chautari!");
 
-    // ── Redirect to role-based dashboard ─────────────────────────────────────
-    if ($role === 'recipient') {
-        header("Location: " . BASE_URL . "pages/recipient_dashboard.php");
-    } else {
-        header("Location: " . BASE_URL . "pages/donor_dashboard.php");
-    }
+    // Redirect to dashboard router — it will pick the right page
+    header("Location: " . BASE_URL . "pages/dashboard.php");
     exit;
 
 } catch (PDOException $e) {

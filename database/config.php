@@ -54,3 +54,20 @@ function get_flash_message(): ?array {
     }
     return null;
 }
+
+// ── Global Helper: Category emoji ─────────────────────────────────────────────
+if (!function_exists('cat_emoji')) {
+    function cat_emoji(string $cat): string {
+        return match($cat) {
+            'Clothing'       => '👕',
+            'Education'      => '📚',
+            'Food'           => '🍱',
+            'Essential Needs'=> '🧴',
+            'Medical'        => '💊',
+            'Toys'           => '🧸',
+            'Books'          => '📖',
+            'Electronics'    => '💻',
+            default          => '📦',
+        };
+    }
+}

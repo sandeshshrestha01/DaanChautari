@@ -1,8 +1,17 @@
 /* ================= HOME SECTION ================= */
+:root {
+  --primary-green: #2e7d32;
+  --dark-green: #1b3a1c;
+  --accent-green: #14331b;
+  --primary-yellow: #f9a825;
+  --light-green-bg: #e8f5e9;
+  --white: #ffffff;
+}
+
 .home {
   min-height: 88vh;
-  background: #1a6b28;  /* solid deep green like the reference */
-  background-image: linear-gradient(135deg, #155220 0%, #2e7d32 60%, #1a6b28 100%);
+  background: var(--dark-green);  /* solid deep green like the reference */
+  background-image: linear-gradient(135deg, var(--accent-green) 0%, var(--dark-green) 60%, #1f472c 100%);
   position: relative;
   display: flex;
   align-items: center;
@@ -48,9 +57,9 @@
         font-size: 12.5px;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        color:#2e7d32;
-        background: #eef7ee;
-        border: 1px solid #a9d9ad;
+        color:#1b5e20;
+        background: #d4edda;
+        border: 1px solid #88c994;
         padding: 6px 14px;
         border-radius: 999px;
         margin-bottom: 16px;
@@ -59,10 +68,10 @@
         width: 6px;
         height: 6px;
         border-radius: 50%;
-        background: #f9a825;;
+        background: #f9a825;
       }
 
-.home-text h1 {
+.home-text .hero-title {
   font-size: 46px;
   font-weight: 800;
   color: #ffffff;
@@ -71,7 +80,7 @@
 }
 
 /* Italic yellow brand name */
-.home-text h1 span {
+.home-text .hero-title .brand {
   color: var(--primary-yellow);
   font-style: italic;
 }
@@ -91,7 +100,7 @@
 
 .hero-desc {
   font-size: 15px;
-  color: rgba(255,255,255,0.85);
+  color: rgba(255,255,255,0.95);
   line-height: 1.75;
   margin-bottom: 0;
   margin-top: 0;
@@ -291,8 +300,8 @@
 
 .stat-label {
   font-size: 13px;
-  color: #777;
-  font-weight: 500;
+  color: #595959;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
@@ -332,7 +341,7 @@
 }
 
 .section-header p {
-  color: #666;
+  color: #4a4a4a;
   font-size: 15px;
 }
 
@@ -400,7 +409,7 @@
 }
 
 .cause-content p {
-  color: #666;
+  color: #4a4a4a;
   font-size: 14px;
   margin-bottom: 20px;
   line-height: 1.6;
@@ -434,7 +443,7 @@
   color: var(--primary-green);
 }
 .goal {
-  color: #666;
+  color: #4a4a4a;
 }
 
 /* ================= VOLUNTEER CTA CARD ================= */
@@ -472,7 +481,7 @@
   margin-bottom: 12px;
 }
 .volunteer-cta-text p {
-  color: #e8f5e9;
+  color: #f0faf0;
   max-width: 480px;
   font-size: 15px;
 }

@@ -1,19 +1,32 @@
-body{
-    margin:0;
-    font-family:'Poppins',sans-serif;
-    background:#f5f5f5;
+:root {
+  --primary-green: #2e7d32;
+  --dark-green: #1b5e20;
+  --primary-yellow: #f9a825;
+  --label-yellow: #7a5900;
+  --bg-light: #f5f5f5;
+  --input-bg: #fafafa;
+  --white: #ffffff;
+  --text-dark: #1a1a1a;
+  --text-muted: #333333;
+  --border-color: #dddddd;
 }
 
-.container{
+body {
+    margin:0;
+    font-family:'Poppins',sans-serif;
+    background:var(--bg-light);
+}
+
+.container {
     display:flex;
     min-height:100vh;
 }
 
 /* LEFT SIDE */
-.left{
+.left {
     flex:1;
-    background:linear-gradient(135deg,#2e7d32,#1b5e20);
-    color:white;
+    background:linear-gradient(135deg,var(--primary-green),var(--dark-green));
+    color:var(--white);
     display:flex;
     flex-direction:column;
     justify-content:center;
@@ -23,40 +36,40 @@ body{
 }
 
 .yellow-text {
-    color: #f9a825;
+    color: var(--primary-yellow);
 }
 
-.left h1{
+.left h1 {
     font-size:3rem;
     margin-bottom:15px;
 }
 
-.left p{
+.left p {
     font-size:1.1rem;
     opacity:0.9;
 }
 
 /* RIGHT SIDE */
-.form-box{
+.form-box {
     flex:1;
     display:flex;
     justify-content:center;
     align-items:center;
-    background:#fff;
+    background:var(--white);
     padding-top:90px;
 }
 
-.form{
+.form {
     width:100%;
     max-width:400px;
     display:flex;
     flex-direction:column;
 }
 
-.form h2{
+.form h2 {
     text-align:left;
     margin-bottom:4px;
-    color:#1b5e20;
+    color:var(--dark-green);
     font-size:1.6rem;
     margin-top:4px;
 }
@@ -66,7 +79,7 @@ body{
     font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.1em;
-    color: #e0a800;
+    color: var(--label-yellow);
     text-transform: uppercase;
     display: block;
     margin-bottom: 2px;
@@ -82,35 +95,35 @@ body{
 .form-group label {
     font-size: 0.82rem;
     font-weight: 600;
-    color: #333;
+    color: var(--text-dark);
     margin-bottom: 4px;
 }
 
 .form input,
-.form select{
+.form select {
     padding:10px 12px;
     margin-bottom:0px;
-    border:1px solid #ddd;
+    border:1px solid var(--border-color);
     border-radius:8px;
     outline:none;
     font-size: 0.9rem;
-    background: #fafafa;
+    background: var(--input-bg);
     transition: border-color 0.2s;
 }
 
 .form input:focus,
-.form select:focus{
-    border-color:#2e7d32;
-    background:#fff;
+.form select:focus {
+    border-color:var(--primary-green);
+    background:var(--white);
 }
 
 /* Role toggle (Donor / Recipient) */
 .role-toggle {
     display: flex;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     overflow: hidden;
-    background: #f5f5f5;
+    background: var(--bg-light);
 }
 
 .role-toggle input[type="radio"] {
@@ -123,7 +136,7 @@ body{
     padding: 9px 12px;
     font-size: 0.88rem;
     font-weight: 600;
-    color: #555;
+    color: var(--text-muted);
     cursor: pointer;
     transition: background 0.2s, color 0.2s;
     user-select: none;
@@ -131,8 +144,8 @@ body{
 }
 
 .role-toggle input[type="radio"]:checked + .role-btn {
-    background: #2e7d32;
-    color: #fff;
+    background: var(--primary-green);
+    color: var(--white);
 }
 
 /* Terms checkbox row */
@@ -147,7 +160,7 @@ body{
     margin-top: 2px;
     width: 14px;
     height: 14px;
-    accent-color: #2e7d32;
+    accent-color: var(--primary-green);
     flex-shrink: 0;
     padding: 0;
     border: none;
@@ -155,37 +168,37 @@ body{
 
 .form-check label {
     font-size: 0.8rem;
-    color: #555;
+    color: var(--text-muted);
     line-height: 1.4;
     cursor: pointer;
 }
 
-.form button{
+.form button {
     padding:12px;
     border:none;
     border-radius:8px;
-    background:#2e7d32;
-    color:white;
+    background:var(--primary-green);
+    color:var(--white);
     cursor:pointer;
     font-size:16px;
 }
 
-.form button:hover{
-    background:#1b5e20;
+.form button:hover {
+    background:var(--dark-green);
 }
 
-.form p{
+.form p {
     text-align:center;
     margin-top:15px;
 }
 
-.form a{
-    color:#f9a825;
+.form a {
+    color:var(--primary-yellow);
     text-decoration:none;
     font-weight:600;
 }
 
-.form a:hover{
+.form a:hover {
     text-decoration:underline;
 }
 
@@ -223,4 +236,99 @@ body{
   .form-box {
     padding: 15px;
   }
+}
+
+/* Flash messages */
+.flash-msg {
+    margin: 0 auto 12px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    max-width: 400px;
+    width: 100%;
+}
+.flash-success { background: #e8f5e9; color: #2e7d32; border-left: 4px solid #2e7d32; }
+.flash-error   { background: #ffebee; color: #c62828; border-left: 4px solid #c62828; }
+.flash-info    { background: #e3f2fd; color: #1565c0; border-left: 4px solid #1565c0; }
+
+.req { color: #c62828; font-size: 0.8em; }
+.opt { color: #595959; font-size: 0.75em; font-weight: 400; }
+
+/* Role Cards */
+.role-cards {
+    display: flex;
+    gap: 12px;
+    flex-direction: column;
+}
+
+.role-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    background: #fafafa;
+    user-select: none;
+    position: relative;
+}
+
+.role-card:hover {
+    border-color: #2e7d32;
+    background: #f1f8e9;
+}
+
+.role-card.active {
+    border-color: #2e7d32;
+    background: #e8f5e9;
+    box-shadow: 0 0 0 3px rgba(46,125,50,0.12);
+}
+
+.role-card-check {
+    margin-left: auto;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #d5d5d5;
+    color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    flex-shrink: 0;
+    transition: background 0.2s, color 0.2s;
+}
+
+.role-card.active .role-card-check {
+    background: #2e7d32;
+    color: #fff;
+}
+
+.role-card-icon {
+    font-size: 26px;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.role-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.role-card-body strong {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.role-card-body span {
+    font-size: 0.78rem;
+    color: #595959;
+    font-weight: 400;
+    line-height: 1.4;
 }

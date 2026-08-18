@@ -16,7 +16,7 @@ include_once "../includes/header.php";
               <span class="dot"></span> A community goods-sharing platform
             </div>
                 
-                    <h1>Welcome to <span>Dan Chautari</span></h1>
+                    <h1 class="hero-title">Welcome to <span class="brand">Dan Chautari</span></h1>
                     <h2 class="hero-tagline">Sahayogko Chautari, <span>Aashako Yatra</span></h2>
                     <p class="hero-desc">
                         Daan Garaun, Sahara Banaun. We connect people who have goods to give —
@@ -25,7 +25,7 @@ include_once "../includes/header.php";
                     </p>
                     <div class="home-buttons">
                         <a href="donate.php" class="primary-btn hero-primary-btn">Donate</a>
-                        <a href="../auth/signup.php" class="secondary-btn hero-secondary-btn">Become a Volunteer</a>
+                        <a href="../pages/volunteer.php" class="secondary-btn hero-secondary-btn">Become a Volunteer</a>
                     </div>
                 </div>
 
@@ -223,7 +223,7 @@ include_once "../includes/header.php";
                     <p>If you cannot contribute financially, donate your time! Join our dedicated panel of network volunteers helping coordinate relief drives and camp assemblies on the ground.</p>
                 </div>
                 <div>
-                    <a href="../auth/signup.php" class="secondary-btn">Register as a Volunteer</a>
+                    <a href="../pages/volunteer.php" class="secondary-btn">Register as a Volunteer</a>
                 </div>
             </div>
         </section>

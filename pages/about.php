@@ -94,8 +94,8 @@ include_once "../includes/header.php";
             <p class="team-bio">Computer science student turned changemaker. Sandesh started Dan Chautari after noticing how much usable items went to waste in Kathmandu neighborhoods.</p>
         </div>
         <div class="team-card">
-            <div class="team-avatar" style="background:linear-gradient(135deg,#f9a825,#e69100);">👩</div>
-            <h4>Sunita Thapa</h4>
+            <div class="team-avatar" style="background:linear-gradient(135deg,#f9a825,#e69100);">🧑</div>
+            <h4>Ganesh Kafle</h4>
             <p class="team-role">Community Outreach Lead</p>
             <p class="team-bio">Former social worker with 5 years of grassroots experience. Sunita manages all field coordination and community partnerships across 3 districts.</p>
         </div>

@@ -5,11 +5,11 @@
 
 :root {
   --primary-color: #2e7d32;
-  --dark-color: #1b5e20;
+  --dark-color: #1f472c;
   --secondary-color: #f9a825;
   --light-bg: #f5f5f5;
   --white: #ffffff;
-  --text-muted: #777777;
+  --text-muted: #595959;
   --border-color: #e0e0e0;
 }
 
@@ -166,7 +166,7 @@
   padding: 15px;
   font-size: 14px;
   border-bottom: 1px solid #f0f0f0;
-  color: #555;
+  color: #1a1a1a;
   vertical-align: middle;
 }
 
@@ -335,9 +335,9 @@ input:checked + .slider:before {
 .btn-secondary-db {
   display: inline-block;
   padding: 10px 20px;
-  background: #f5f5f5;
-  color: #333;
-  border: 1px solid #ddd;
+  background: #e0e0e0;
+  color: #1a1a1a;
+  border: 1px solid #bdbdbd;
   border-radius: 6px;
   font-weight: 600;
   cursor: pointer;
@@ -392,5 +392,34 @@ input:checked + .slider:before {
   .db-header-badge {
     width: 100%;
     text-align: center;
+  }
+}
+
+/* Animations */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Print Mode Layout */
+@media print {
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .header-wrapper, footer, .no-print, #navToggle {
+    display: none !important;
+  }
+  .dashboard-wrapper {
+    padding-top: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  #receipt-print-area {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 }

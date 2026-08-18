@@ -102,9 +102,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         exit;
                     }
 
-                    // Delete old photo if it exists
-                    if (!empty($user['profile_photo']) && file_exists(__DIR__ . '/../' . $user['profile_photo'])) {
-                        @unlink(__DIR__ . '/../' . $user['profile_photo']);
+                    // Delete previous profile picture from assets/images/profiles/
+                    if (!empty($user['profile_photo'])) {
+                        $old_profile_filename = basename($user['profile_photo']);
+                        $old_profile_filepath = $upload_dir . $old_profile_filename;
+                        if (file_exists($old_profile_filepath)) {
+                            @unlink($old_profile_filepath);
+                        }
                     }
 
                     $ext      = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
@@ -198,9 +202,31 @@ include_once __DIR__ . '/../includes/header.php';
                     <?php echo htmlspecialchars($user['role']); ?>
                 </div>
                 
-                <div style="font-size: 12px; color: #888; max-width: 200px; line-height: 1.5;">
+                <div style="font-size: 12px; color: #888; max-width: 200px; line-height: 1.5; margin-bottom: 24px;">
                     Support files: JPG, PNG, WEBP, GIF. Max file size: 3MB.
                 </div>
+
+                <!-- Profile Page Role Switcher Card -->
+                <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] !== 'admin'): ?>
+                <div style="width: 100%; max-width: 240px; background: #f1f8e9; border: 1.5px solid #c8e6c9; border-radius: 12px; padding: 16px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+                    <div style="font-size: 11px; font-weight: 700; color: #2e7d32; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
+                        🔄 Switch Role
+                    </div>
+                    <p style="font-size: 12px; color: #555; margin-bottom: 12px; line-height: 1.4;">
+                        Currently operating as <strong><?php echo ucfirst($_SESSION['user_role']); ?></strong>. Switch instantly below:
+                    </p>
+                    <form action="<?php echo BASE_URL; ?>auth/switch_role.php" method="POST">
+                        <div style="display: flex; background: #e0e0e0; border-radius: 20px; padding: 3px;">
+                            <button type="submit" name="role" value="donor" style="flex: 1; border: none; background: <?php echo $_SESSION['user_role'] === 'donor' ? '#2e7d32' : 'transparent'; ?>; color: <?php echo $_SESSION['user_role'] === 'donor' ? '#fff' : '#444'; ?>; padding: 6px 10px; border-radius: 18px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s;">
+                                🤲 Donor
+                            </button>
+                            <button type="submit" name="role" value="recipient" style="flex: 1; border: none; background: <?php echo $_SESSION['user_role'] === 'recipient' ? '#2e7d32' : 'transparent'; ?>; color: <?php echo $_SESSION['user_role'] === 'recipient' ? '#fff' : '#444'; ?>; padding: 6px 10px; border-radius: 18px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s;">
+                                🙏 Recipient
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <?php endif; ?>
             </div>
 
             <!-- Right Side: Profile Details -->

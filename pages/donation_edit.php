@@ -65,14 +65,18 @@ try {
 // ── Handle POST: Edit Donation ────────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'edit_donation') {
     $title       = trim($_POST['title']    ?? '');
-    $category    = $_POST['category']      ?? '';
+    $category    = trim($_POST['category'] ?? '');
+    if ($category === 'Other' || strtolower($category) === 'other') {
+        $custom_cat = trim($_POST['custom_category'] ?? '');
+        if (!empty($custom_cat)) {
+            $category = $custom_cat;
+        }
+    }
     $quantity    = (int)($_POST['quantity'] ?? 1);
     $description = trim($_POST['description'] ?? '');
     $town        = trim($_POST['town']     ?? '');
 
-    $allowed_cats = ['Food','Clothing','Education','Essential Needs'];
-
-    if ($title && in_array($category, $allowed_cats) && $quantity > 0 && $town) {
+    if ($title && !empty($category) && $quantity > 0 && $town) {
         $photo_path = $donation['photo'];
 
         // ── Image Upload ───────────────────────────────────────────────────────
@@ -93,9 +97,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 edit_respond(false, 'Image is too large. Maximum size is 3 MB.', $is_ajax, 'donation_edit.php?id=' . $donation_id);
             }
 
-            // Delete old photo
-            if ($photo_path && file_exists(__DIR__ . '/../' . $photo_path)) {
-                @unlink(__DIR__ . '/../' . $photo_path);
+            // Delete previous image file from assets/images/donations/
+            if (!empty($donation['photo'])) {
+                $old_photo_filename = basename($donation['photo']);
+                $old_photo_filepath = $upload_dir . $old_photo_filename;
+                if (file_exists($old_photo_filepath)) {
+                    @unlink($old_photo_filepath);
+                }
             }
 
             $ext      = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
@@ -147,6 +155,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
+// ── Fetch Dynamic Categories from Database ─────────────────────────────────────
+$default_cats = ['Food', 'Clothing', 'Education', 'Essential Needs'];
+try {
+    $db_cats = $pdo->query("SELECT DISTINCT category FROM donations WHERE category IS NOT NULL AND category != ''")->fetchAll(PDO::FETCH_COLUMN);
+    $categories = array_values(array_unique(array_merge($default_cats, $db_cats)));
+} catch (PDOException $e) {
+    $categories = $default_cats;
+}
+
 // ── Now safe to output HTML ───────────────────────────────────────────────────
 $extra_css  = ['dashboard.css'];
 $page_title = 'Edit Donation';
@@ -185,12 +202,24 @@ include_once "../includes/header.php";
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <div class="form-group" style="margin: 0;">
                         <label for="edit_category" style="font-size: 14px; font-weight: 600; color: #333;">Category <span style="color:#c62828;">*</span></label>
-                        <select id="edit_category" name="category" class="form-control" required style="padding: 12px; height: auto;">
-                            <option value="Food"          <?php echo $donation['category'] === 'Food'           ? 'selected' : ''; ?>>🍱 Food</option>
-                            <option value="Clothing"      <?php echo $donation['category'] === 'Clothing'       ? 'selected' : ''; ?>>👕 Clothing</option>
-                            <option value="Education"     <?php echo $donation['category'] === 'Education'      ? 'selected' : ''; ?>>📚 Education</option>
-                            <option value="Essential Needs" <?php echo $donation['category'] === 'Essential Needs' ? 'selected' : ''; ?>>🧴 Essential Needs</option>
+                        <select id="edit_category" name="category" class="form-control" required style="padding: 12px; height: auto;" onchange="toggleCustomCategory(this, 'edit_custom_cat_wrap')">
+                            <?php foreach ($categories as $cat): ?>
+                                <option value="<?php echo htmlspecialchars($cat); ?>" <?php echo $donation['category'] === $cat ? 'selected' : ''; ?>>
+                                    <?php echo cat_emoji($cat) . ' ' . htmlspecialchars($cat); ?>
+                                </option>
+                            <?php endforeach; ?>
+                            <?php if (!in_array($donation['category'], $categories)): ?>
+                                <option value="<?php echo htmlspecialchars($donation['category']); ?>" selected>
+                                    <?php echo cat_emoji($donation['category']) . ' ' . htmlspecialchars($donation['category']); ?>
+                                </option>
+                            <?php endif; ?>
+                            <option value="Other">➕ Other (Add Custom Category)</option>
                         </select>
+                        <div class="form-group" id="edit_custom_cat_wrap" style="display:none; margin-top: 10px;">
+                            <label for="edit_custom_category" style="font-size:12px; font-weight:600; color:#2e7d32;">Specify Custom Category <span style="color:#c62828;">*</span></label>
+                            <input type="text" id="edit_custom_category" name="custom_category" class="form-control"
+                                   placeholder="e.g. Medical Supplies, Toys..." maxlength="50" style="padding: 10px; border-color:#a5d6a7; background:#f1f8e9;">
+                        </div>
                     </div>
                     <div class="form-group" style="margin: 0;">
                         <label for="edit_quantity" style="font-size: 14px; font-weight: 600; color: #333;">Quantity <span style="color:#c62828;">*</span></label>
@@ -253,14 +282,27 @@ include_once "../includes/header.php";
     </div>
 </div>
 
-<style>
-@keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-</style>
+
 
 <script>
+function toggleCustomCategory(selectEl, wrapId) {
+    const wrap  = document.getElementById(wrapId);
+    const input = wrap ? wrap.querySelector('input') : null;
+    if (selectEl.value === 'Other') {
+        if (wrap) wrap.style.display = 'block';
+        if (input) {
+            input.required = true;
+            input.focus();
+        }
+    } else {
+        if (wrap) wrap.style.display = 'none';
+        if (input) {
+            input.required = false;
+            input.value = '';
+        }
+    }
+}
+
 // ── Image preview helpers ─────────────────────────────────────────────────────
 function previewEditImage(input) {
     const thumb     = document.getElementById('edit_image_thumb');

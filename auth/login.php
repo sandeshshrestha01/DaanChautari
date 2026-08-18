@@ -26,14 +26,6 @@ include_once "../includes/header.php";
                 <input type="password" id="password" name="password" placeholder="••••••••" required>
             </div>
 
-            <div class="form-group">
-                <select name="role" id="role" required>
-                    <option value="">Select Role</option>
-                    <option value="donor">Donor</option>
-                    <option value="recipient">Recipient / Needy</option>
-                    <option value="admin">Admin</option>
-                </select>
-            </div>
 
             <button type="submit">Login</button>
 

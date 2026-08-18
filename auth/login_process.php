@@ -33,12 +33,6 @@ try {
 
     if ($user && password_verify($password, $user['password'])) {
 
-        // If the form sends a role, verify it matches (optional extra check)
-        if (!empty($form_role) && $user['role'] !== $form_role) {
-            set_flash_message('error', 'The role selected does not match our records for this account.');
-            header("Location: login.php");
-            exit;
-        }
 
         // ── Set session variables (using new column names) ────────────────────
         $_SESSION['user_id']    = $user['user_id'];
@@ -51,13 +45,11 @@ try {
 
         set_flash_message('success', "Welcome back, {$user['full_name']}!");
 
-        // ── Role-based redirect ───────────────────────────────────────────────
+        // Route via central dashboard router
         if ($user['role'] === 'admin') {
             header("Location: " . BASE_URL . "admin/dashboard.php");
-        } elseif ($user['role'] === 'recipient') {
-            header("Location: " . BASE_URL . "pages/recipient_dashboard.php");
         } else {
-            header("Location: " . BASE_URL . "pages/donor_dashboard.php");
+            header("Location: " . BASE_URL . "pages/dashboard.php");
         }
         exit;
 

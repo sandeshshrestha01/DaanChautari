@@ -39,14 +39,18 @@ function ajax_respond(bool $ok, string $msg, bool $is_ajax): void {
 // ── Handle POST: Add New Donation ─────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_donation') {
     $title       = trim($_POST['title']    ?? '');
-    $category    = $_POST['category']      ?? '';
+    $category    = trim($_POST['category'] ?? '');
+    if ($category === 'Other' || strtolower($category) === 'other') {
+        $custom_cat = trim($_POST['custom_category'] ?? '');
+        if (!empty($custom_cat)) {
+            $category = $custom_cat;
+        }
+    }
     $quantity    = (int)($_POST['quantity'] ?? 1);
     $description = trim($_POST['description'] ?? '');
     $town        = trim($_POST['town']     ?? '');
 
-    $allowed_cats = ['Food','Clothing','Education','Essential Needs'];
-
-    if ($title && in_array($category, $allowed_cats) && $quantity > 0 && $town) {
+    if ($title && !empty($category) && $quantity > 0 && $town) {
 
         // ── Image Upload ───────────────────────────────────────────────────────
         $photo_path = null;
@@ -101,6 +105,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $del_id = (int)($_POST['donation_id'] ?? 0);
     if ($del_id) {
         try {
+            // 1. Fetch donation photo to delete image file from assets/images/donations/
+            $stmt = $pdo->prepare("SELECT photo FROM donations WHERE donation_id = :id AND donor_id = :donor_id");
+            $stmt->execute(['id' => $del_id, 'donor_id' => $donor_id]);
+            $item_to_delete = $stmt->fetch();
+
+            if ($item_to_delete && !empty($item_to_delete['photo'])) {
+                $photo_filename = basename($item_to_delete['photo']);
+                $target_image_path = __DIR__ . '/../assets/images/donations/' . $photo_filename;
+                if (file_exists($target_image_path)) {
+                    @unlink($target_image_path);
+                }
+            }
+
+            // 2. Delete database record
             $stmt = $pdo->prepare("DELETE FROM donations WHERE donation_id = :id AND donor_id = :donor_id");
             $stmt->execute(['id' => $del_id, 'donor_id' => $donor_id]);
             set_flash_message('success', 'Donation removed successfully.');
@@ -187,6 +205,15 @@ function badge_class(string $status): string {
         'pending'   => 'badge-pending',
         default     => 'badge-info',
     };
+}
+
+// ── Fetch Dynamic Categories from Database ─────────────────────────────────────
+$default_cats = ['Food', 'Clothing', 'Education', 'Essential Needs'];
+try {
+    $db_cats = $pdo->query("SELECT DISTINCT category FROM donations WHERE category IS NOT NULL AND category != ''")->fetchAll(PDO::FETCH_COLUMN);
+    $categories = array_values(array_unique(array_merge($default_cats, $db_cats)));
+} catch (PDOException $e) {
+    $categories = $default_cats;
 }
 ?>
 
@@ -375,13 +402,19 @@ function badge_class(string $status): string {
 
                     <div class="form-group">
                         <label for="dd_category">Category <span style="color:#c62828;">*</span></label>
-                        <select id="dd_category" name="category" class="form-control" required>
+                        <select id="dd_category" name="category" class="form-control" required onchange="toggleCustomCategory(this, 'dd_custom_cat_wrap')">
                             <option value="">— Select Category —</option>
-                            <option value="Food">🍱 Food</option>
-                            <option value="Clothing">👕 Clothing</option>
-                            <option value="Education">📚 Education</option>
-                            <option value="Essential Needs">🧴 Essential Needs</option>
+                            <?php foreach ($categories as $cat): ?>
+                                <option value="<?php echo htmlspecialchars($cat); ?>"><?php echo cat_emoji($cat) . ' ' . htmlspecialchars($cat); ?></option>
+                            <?php endforeach; ?>
+                            <option value="Other">➕ Other</option>
                         </select>
+                    </div>
+
+                    <div class="form-group" id="dd_custom_cat_wrap" style="display:none; margin-top: -10px; margin-bottom: 15px;">
+                        <label for="dd_custom_category" style="font-size:13px; font-weight:600; color:#2e7d32;">Specify Custom Category <span style="color:#c62828;">*</span></label>
+                        <input type="text" id="dd_custom_category" name="custom_category" class="form-control"
+                               placeholder="e.g. Furniture, Sports equipment..." maxlength="50" style="border-color:#a5d6a7; background:#f1f8e9;">
                     </div>
                     <div class="form-group">
                         <label for="dd_image">Item Image <span style="color:#aaa; font-size:11px;">(optional · JPG/PNG/WEBP · max 3MB)</span></label>
@@ -425,8 +458,8 @@ function badge_class(string $status): string {
 
             <!-- Quick Tips Card -->
             <div class="db-panel" style="background: linear-gradient(135deg,#e8f5e9,#f1f8e9); border-color:#c8e6c9;">
-                <div class="db-panel-title" style="color:#2e7d32;">💡 Donor Tips</div>
-                <ul style="list-style:none; padding:0; font-size:13px; color:#558b2f; line-height:2;">
+                <div class="db-panel-title" style="color:#255027;">💡 Donor Tips</div>
+                <ul style="list-style:none; padding:0; font-size:13px; color:#343e2e; line-height:2;">
                     <li>✅ Add a clear description to get faster requests</li>
                     <li>📍 List your correct town so nearby recipients find you</li>
                     <li>🔔 Requests are reviewed and approved by our admin team</li>
@@ -446,6 +479,24 @@ function badge_class(string $status): string {
 </body>
 
 <script>
+function toggleCustomCategory(selectEl, wrapId) {
+    const wrap  = document.getElementById(wrapId);
+    const input = wrap ? wrap.querySelector('input') : null;
+    if (selectEl.value === 'Other') {
+        if (wrap) wrap.style.display = 'block';
+        if (input) {
+            input.required = true;
+            input.focus();
+        }
+    } else {
+        if (wrap) wrap.style.display = 'none';
+        if (input) {
+            input.required = false;
+            input.value = '';
+        }
+    }
+}
+
 function previewDonationImage(input) {
     const preview = document.getElementById('dd_image_preview');
     const thumb   = document.getElementById('dd_image_thumb');

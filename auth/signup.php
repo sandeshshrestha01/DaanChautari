@@ -45,15 +45,6 @@ include_once "../includes/header.php";
                 <input type="text" id="address" name="address" placeholder="Thamel, Ward 26" required>
             </div>
 
-            <div class="form-group">
-                <label>I am joining as <span class="req">*</span></label>
-                <div class="role-toggle">
-                    <input type="radio" id="role_donor"     name="role" value="donor"     checked>
-                    <label for="role_donor"     class="role-btn">🤲 Donor</label>
-                    <input type="radio" id="role_recipient" name="role" value="recipient">
-                    <label for="role_recipient" class="role-btn">🙏 Recipient</label>
-                </div>
-            </div>
 
             <div class="form-group">
                 <label for="password">Password <span class="req">*</span></label>
@@ -83,24 +74,29 @@ include_once "../includes/header.php";
 
 </div>
 
-<style>
-/* Flash messages */
-.flash-msg {
-    margin: 0 auto 12px;
-    padding: 12px 16px;
-    border-radius: 8px;
-    font-size: 0.88rem;
-    font-weight: 500;
-    max-width: 400px;
-    width: 100%;
-}
-.flash-success { background: #e8f5e9; color: #2e7d32; border-left: 4px solid #2e7d32; }
-.flash-error   { background: #ffebee; color: #c62828; border-left: 4px solid #c62828; }
-.flash-info    { background: #e3f2fd; color: #1565c0; border-left: 4px solid #1565c0; }
 
-.req { color: #c62828; font-size: 0.8em; }
-.opt { color: #999;    font-size: 0.75em; font-weight: 400; }
-</style>
+
+<script>
+(function () {
+    var cards = document.querySelectorAll('.role-card');
+
+    // Mark the currently-checked radio's card as active on load
+    document.querySelectorAll('input[name="role"]').forEach(function (radio) {
+        if (radio.checked) {
+            var card = document.getElementById('card-' + radio.value);
+            if (card) card.classList.add('active');
+        }
+    });
+
+    // Toggle active class when any card is clicked
+    cards.forEach(function (card) {
+        card.addEventListener('click', function () {
+            cards.forEach(function (c) { c.classList.remove('active'); });
+            card.classList.add('active');
+        });
+    });
+}());
+</script>
 
 </body>
 </html>

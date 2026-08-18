@@ -34,7 +34,9 @@ include_once "../includes/header.php";
                     <li>Book &amp; stationery drives</li>
                     <li>Uniform donation campaigns</li>
                 </ul>
-                <a href="donate.php?cause_id=1" class="service-cta-btn">Donate for Education →</a>
+                <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'donor'): ?>
+                    <a href="donate.php?cause_id=1" class="service-cta-btn">Donate for Education →</a>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -51,7 +53,9 @@ include_once "../includes/header.php";
                     <li>First-aid supply collection</li>
                     <li>Food parcel distribution</li>
                 </ul>
-                <a href="donate.php?cause_id=2" class="service-cta-btn">Support Disaster Relief →</a>
+                <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'donor'): ?>
+                    <a href="donate.php?cause_id=2" class="service-cta-btn">Support Disaster Relief →</a>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -68,7 +72,9 @@ include_once "../includes/header.php";
                     <li>Festival food drives</li>
                     <li>Nutrition package assembly</li>
                 </ul>
-                <a href="donate.php?cause_id=3" class="service-cta-btn">Donate Food Items →</a>
+                <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'donor'): ?>
+                    <a href="donate.php?cause_id=3" class="service-cta-btn">Donate Food Items →</a>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -85,7 +91,9 @@ include_once "../includes/header.php";
                     <li>Household goods redistribution</li>
                     <li>Hygiene kit assembly</li>
                 </ul>
-                <a href="donate.php" class="service-cta-btn">Donate Clothing →</a>
+                <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'donor'): ?>
+                    <a href="donate.php" class="service-cta-btn">Donate Clothing →</a>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -102,7 +110,7 @@ include_once "../includes/header.php";
                     <li>Donor relationship management</li>
                     <li>Ground-level distribution</li>
                 </ul>
-                <a href="../auth/signup.php" class="service-cta-btn">Join as Volunteer →</a>
+                <a href="../pages/volunteer.php" class="service-cta-btn">Join as Volunteer →</a>
             </div>
         </div>
 
@@ -171,7 +179,9 @@ include_once "../includes/header.php";
             <p>It takes less than 5 minutes to list your first donation. Join 80+ donors who are already changing lives across Nepal.</p>
         </div>
         <div>
-            <a href="donate.php" class="secondary-btn" style="padding:14px 32px;font-size:15px;">Start Donating Now →</a>
+            <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'donor'): ?>
+                <a href="donate.php" class="secondary-btn" style="padding:14px 32px;font-size:15px;">Start Donating Now →</a>
+            <?php endif; ?>
         </div>
     </div>
 </section>

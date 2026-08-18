@@ -81,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 header("Location: donate.php");
                 exit;
             }
-            $photo_path = 'assets/images/donations/' . $filename;
+            $photo_path =BASE_URL.'assets/images/donations/' . $filename;
         }
 
         try {
@@ -343,35 +343,7 @@ if (isset($_GET['success']) && $_GET['success'] == 1 && isset($_GET['id'])) {
 
 </div>
 
-<!-- Styles for print mode layout and slide-up animations -->
-<style>
-@keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
 
-@media print {
-    body {
-        background: #fff !important;
-        color: #000 !important;
-    }
-    .header-wrapper, footer, .no-print, #navToggle {
-        display: none !important;
-    }
-    .dashboard-wrapper {
-        padding-top: 0 !important;
-        margin: 0 !important;
-        width: 100% !important;
-        max-width: 100% !important;
-    }
-    #receipt-print-area {
-        border: none !important;
-        box-shadow: none !important;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-}
-</style>
 
 <script>
 function previewDonationImage(input) {

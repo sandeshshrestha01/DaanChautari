@@ -30,6 +30,9 @@ if (isset($_SESSION['user_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo isset($page_title) ? htmlspecialchars($page_title) . " - Dan Chautari" : "Dan Chautari - Sahayogko Chautari, Aashako Yatra"; ?></title>
     
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
     <!-- Design Assets Stylesheets -->
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/style.css">
     <?php
@@ -75,10 +78,10 @@ if (isset($_SESSION['user_id'])) {
                             <li><a href="<?php echo BASE_URL; ?>admin/dashboard.php" class="<?php echo $current_page == 'dashboard.php' ? 'active' : ''; ?>">Admin Panel</a></li>
                             <li><a href="<?php echo BASE_URL; ?>admin/manage_users.php">Manage Users</a></li>
                             <li><a href="<?php echo BASE_URL; ?>admin/manage_donations.php">Donations Ledgers</a></li>
-                        <?php elseif ($_SESSION['user_role'] === 'needy'): ?>
+                        <?php elseif ($_SESSION['user_role'] === 'recipient'): ?>
                             <li><a href="<?php echo BASE_URL; ?>pages/request_aid.php" class="<?php echo $current_page == 'request_aid.php' ? 'active' : ''; ?>">Request Support</a></li>
                             <li><a href="<?php echo BASE_URL; ?>pages/recipient_dashboard.php" class="<?php echo $current_page == 'recipient_dashboard.php' ? 'active' : ''; ?>">Dashboard</a></li>
-                        <?php else: // donor ?>
+                        <?php elseif ($_SESSION['user_role'] === 'donor'): ?>
                             <li><a href="<?php echo BASE_URL; ?>pages/donate.php" class="<?php echo $current_page == 'donate.php' ? 'active' : ''; ?>">Donate</a></li>
                             <li><a href="<?php echo BASE_URL; ?>pages/donor_dashboard.php" class="<?php echo $current_page == 'donor_dashboard.php' ? 'active' : ''; ?>">Dashboard</a></li>
                         <?php endif; ?>
@@ -129,6 +132,26 @@ if (isset($_SESSION['user_id'])) {
                                     Edit Profile
                                 </a>
                                 <div class="dropdown-divider"></div>
+                                
+                                <!-- Role Switcher -->
+                                <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] !== 'admin'): ?>
+                                <div class="role-switch-container">
+                                    <div class="role-switch-label">
+                                        <span>Active Role Mode</span>
+                                    </div>
+                                    <form action="<?php echo BASE_URL; ?>auth/switch_role.php" method="POST" class="role-switch-form">
+                                        <div class="role-toggle-pill">
+                                            <button type="submit" name="role" value="donor" class="role-pill-btn <?php echo $_SESSION['user_role'] === 'donor' ? 'active' : ''; ?>">
+                                                🤲 Donor
+                                            </button>
+                                            <button type="submit" name="role" value="recipient" class="role-pill-btn <?php echo $_SESSION['user_role'] === 'recipient' ? 'active' : ''; ?>">
+                                                🙏 Recipient
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <?php endif; ?>
+
                                 <a class="dropdown-item logout" href="<?php echo BASE_URL; ?>auth/logout.php" onclick="return confirm('Are you sure you want to log out?');">
                                     <svg viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
                                     Log Out
