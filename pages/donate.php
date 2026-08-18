@@ -23,6 +23,15 @@ if ($_SESSION['user_role'] !== 'donor') {
 
 $donor_id = $_SESSION['user_id'];
 
+// ── Fetch Dynamic Categories from Database ─────────────────────────────────────
+$default_cats = ['Food', 'Clothing', 'Education', 'Essential Needs'];
+try {
+    $db_cats = $pdo->query("SELECT DISTINCT category FROM donations WHERE category IS NOT NULL AND category != ''")->fetchAll(PDO::FETCH_COLUMN);
+    $categories = array_values(array_unique(array_merge($default_cats, $db_cats)));
+} catch (PDOException $e) {
+    $categories = $default_cats;
+}
+
 // ── Pre-fill Category from Cause ID (if coming from Home Page needs) ──────────
 $selected_category = '';
 if (isset($_GET['cause_id'])) {
@@ -39,14 +48,18 @@ if (isset($_GET['cause_id'])) {
 // ── Handle POST: Add New Donation ─────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_donation') {
     $title       = trim($_POST['title']    ?? '');
-    $category    = $_POST['category']      ?? '';
+    $category    = trim($_POST['category'] ?? '');
+    if ($category === 'Other' || strtolower($category) === 'other') {
+        $custom_cat = trim($_POST['custom_category'] ?? '');
+        if (!empty($custom_cat)) {
+            $category = $custom_cat;
+        }
+    }
     $quantity    = (int)($_POST['quantity'] ?? 1);
     $description = trim($_POST['description'] ?? '');
     $town        = trim($_POST['town']     ?? '');
 
-    $allowed_cats = ['Food','Clothing','Education','Essential Needs'];
-
-    if ($title && in_array($category, $allowed_cats) && $quantity > 0 && $town) {
+    if ($title && !empty($category) && $quantity > 0 && $town) {
 
         // ── Image Upload ───────────────────────────────────────────────────────
         $photo_path = null;
@@ -81,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 header("Location: donate.php");
                 exit;
             }
-            $photo_path =BASE_URL.'assets/images/donations/' . $filename;
+            $photo_path = 'assets/images/donations/' . $filename;
         }
 
         try {
@@ -281,18 +294,26 @@ if (isset($_GET['success']) && $_GET['success'] == 1 && isset($_GET['id'])) {
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                         <div class="form-group" style="margin: 0;">
                             <label for="dn_category" style="font-size: 14px; font-weight: 600; color: #333;">Category <span style="color:#c62828;">*</span></label>
-                            <select id="dn_category" name="category" class="form-control" required style="padding: 12px; height: auto;">
+                            <select id="dn_category" name="category" class="form-control" required style="padding: 12px; height: auto;" onchange="toggleCustomCategory(this, 'dn_custom_cat_wrap')">
                                 <option value="">— Select Category —</option>
-                                <option value="Food" <?php echo $selected_category === 'Food' ? 'selected' : ''; ?>>🍱 Food</option>
-                                <option value="Clothing" <?php echo $selected_category === 'Clothing' ? 'selected' : ''; ?>>👕 Clothing</option>
-                                <option value="Education" <?php echo $selected_category === 'Education' ? 'selected' : ''; ?>>📚 Education</option>
-                                <option value="Essential Needs" <?php echo $selected_category === 'Essential Needs' ? 'selected' : ''; ?>>🧴 Essential Needs</option>
+                                <?php foreach ($categories as $cat): ?>
+                                    <option value="<?php echo htmlspecialchars($cat); ?>" <?php echo $selected_category === $cat ? 'selected' : ''; ?>>
+                                        <?php echo cat_emoji($cat) . ' ' . htmlspecialchars($cat); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                                <option value="Other">➕ Other</option>
                             </select>
                         </div>
                         <div class="form-group" style="margin: 0;">
                             <label for="dn_quantity" style="font-size: 14px; font-weight: 600; color: #333;">Quantity <span style="color:#c62828;">*</span></label>
                             <input type="number" id="dn_quantity" name="quantity" class="form-control" min="1" value="1" required style="padding: 12px;">
                         </div>
+                    </div>
+
+                    <!-- Custom Category Input (Hidden by default) -->
+                    <div class="form-group" id="dn_custom_cat_wrap" style="display:none; margin: 0;">
+                        <label for="dn_custom_category" style="font-size:13px; font-weight:600; color:#2e7d32;">Specify Custom Category <span style="color:#c62828;">*</span></label>
+                        <input type="text" id="dn_custom_category" name="custom_category" class="form-control" placeholder="e.g. Furniture, Sports equipment..." maxlength="50" style="padding: 12px; border-color:#a5d6a7; background:#f1f8e9;">
                     </div>
 
                     <!-- Location Town -->
@@ -345,26 +366,7 @@ if (isset($_GET['success']) && $_GET['success'] == 1 && isset($_GET['id'])) {
 
 
 
-<script>
-function previewDonationImage(input) {
-    const preview = document.getElementById('dn_image_preview');
-    const thumb   = document.getElementById('dn_image_thumb');
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            thumb.src = e.target.result;
-            preview.style.display = 'block';
-        };
-        reader.readAsDataURL(input.files[0]);
-    }
-}
-
-function clearDonationImage() {
-    document.getElementById('dn_image').value = '';
-    document.getElementById('dn_image_thumb').src = '';
-    document.getElementById('dn_image_preview').style.display = 'none';
-}
-</script>
+<script src="<?php echo BASE_URL; ?>assets/js/main.js" defer></script>
 
 <?php
 include_once "../includes/footer.php";

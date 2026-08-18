@@ -3,7 +3,6 @@ $extra_css = ['auth.css'];
 include_once "../includes/header.php";
 ?>
 
-
 <div class="container">
 
     <div class="left">
@@ -39,5 +38,7 @@ include_once "../includes/header.php";
     </div>
 
 </div>
+
+<script src="<?php echo BASE_URL; ?>assets/js/auth.js" defer></script>
 </body>
 </html>

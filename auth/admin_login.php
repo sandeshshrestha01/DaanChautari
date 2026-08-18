@@ -27,6 +27,7 @@ $flash = get_flash_message();
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
     <link rel="shortcut icon" href="<?php echo BASE_URL; ?>assets/images/logo.png" type="image/png">
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/admin.css">
+    <script src="<?php echo BASE_URL; ?>assets/js/auth.js" defer></script>
 </head>
 <body class="admin-login-body">
 
@@ -130,27 +131,5 @@ $flash = get_flash_message();
     </div>
 </div>
 
-<script>
-    // Toggle password visibility
-    document.getElementById('togglePw').addEventListener('click', function () {
-        const pw = document.getElementById('admin_password');
-        const icon = document.getElementById('eyeIcon');
-        const isText = pw.type === 'text';
-        pw.type = isText ? 'password' : 'text';
-        icon.innerHTML = isText
-            ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
-            : '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
-    });
-
-    // Spinner on submit
-    document.getElementById('adminLoginForm').addEventListener('submit', function () {
-        const btn    = document.getElementById('loginBtn');
-        const spinner = document.getElementById('loginSpinner');
-        const text    = document.getElementById('loginBtnText');
-        btn.disabled        = true;
-        spinner.style.display = 'block';
-        text.textContent    = 'Signing in…';
-    });
-</script>
 </body>
 </html>

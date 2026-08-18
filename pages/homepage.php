@@ -1,6 +1,44 @@
 <?php
 $extra_css = ['home.css'];
 include_once "../includes/header.php";
+
+// Fetch dynamic statistics from database
+$items_donated_count = 0;
+$generous_donors_count = 0;
+$active_volunteers_count = 0;
+$communities_count = 0;
+
+try {
+    // Total items donated (sum of quantity of donations)
+    $items_stmt = $pdo->query("SELECT COALESCE(SUM(quantity), COUNT(*)) FROM donations");
+    $items_donated_count = (int)$items_stmt->fetchColumn();
+
+    // Total generous donors (distinct donors from donations table)
+    $donors_stmt = $pdo->query("SELECT COUNT(DISTINCT donor_id) FROM donations");
+    $generous_donors_count = (int)$donors_stmt->fetchColumn();
+
+    // Active volunteers count
+    $vols_stmt = $pdo->query("SELECT COUNT(*) FROM volunteers WHERE status = 'active'");
+    $active_volunteers_count = (int)$vols_stmt->fetchColumn();
+    if ($active_volunteers_count === 0) {
+        // Fallback to total registered volunteers if active status not set yet
+        $active_volunteers_count = (int)$pdo->query("SELECT COUNT(*) FROM volunteers")->fetchColumn();
+    }
+
+    // Communities supported (distinct towns/cities from donations and users)
+    $towns_stmt = $pdo->query("SELECT COUNT(DISTINCT town) FROM (
+        SELECT town FROM donations WHERE town IS NOT NULL AND town != ''
+        UNION
+        SELECT town FROM users WHERE town IS NOT NULL AND town != ''
+    ) AS combined_towns");
+    $communities_count = (int)$towns_stmt->fetchColumn();
+} catch (PDOException $e) {
+    // Fallback numbers on error
+    $items_donated_count = 0;
+    $generous_donors_count = 0;
+    $active_volunteers_count = 0;
+    $communities_count = 0;
+}
 ?>
     <!-- Navigation Header -->
     
@@ -62,19 +100,19 @@ include_once "../includes/header.php";
         <section class="stats-section">
             <div class="stats-grid">
                 <div class="stat-item">
-                    <div class="stat-number" data-count="2300">0+</div>
+                    <div class="stat-number" data-count="<?php echo $items_donated_count; ?>">0+</div>
                     <div class="stat-label">Items Donated</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-number" data-count="80">0+</div>
+                    <div class="stat-number" data-count="<?php echo $generous_donors_count; ?>">0+</div>
                     <div class="stat-label">Generous Donors</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-number" data-count="45">0+</div>
+                    <div class="stat-number" data-count="<?php echo $active_volunteers_count; ?>">0+</div>
                     <div class="stat-label">Active Volunteers</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-number" data-count="3">0</div>
+                    <div class="stat-number" data-count="<?php echo $communities_count; ?>">0</div>
                     <div class="stat-label">Communities Supported</div>
                 </div>
             </div>
@@ -97,7 +135,7 @@ include_once "../includes/header.php";
                   stroke-linejoin="round"
                 />
                 <path
-                  d="M21 5.5c-3-1.5-6-1.5-9 0v13c3-1.5 6-1.5 9 0v-13z"
+                  d="M21 5.5c-3-1.5-6-1.5-9 0v13c3-1.5-6-1.5-9 0v-13z"
                   stroke="#2e7d32"
                   stroke-width="1.6"
                   stroke-linejoin="round"
@@ -228,23 +266,8 @@ include_once "../includes/header.php";
             </div>
         </section>
     </main>
-<script>
-    const counters = document.querySelectorAll(".stat-number");
 
-    counters.forEach((counter) => {
-        const target = +counter.getAttribute("data-count");
-        let current = 0;
-        const increment = target > 100 ? 50 : 1;
-        const step = setInterval(() => {
-            current += increment;
-            counter.innerText = current.toLocaleString() + "+";
-            if (current >= target) {
-                clearInterval(step);
-                counter.innerText = target.toLocaleString() + "+";
-            }
-        }, 20);
-    });
-</script>   
+<script src="<?php echo BASE_URL; ?>assets/js/main.js" defer></script>
 
 <?php
 include_once "../includes/footer.php";
