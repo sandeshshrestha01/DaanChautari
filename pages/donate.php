@@ -99,8 +99,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
         try {
             $stmt = $pdo->prepare("
-                INSERT INTO donations (donor_id, title, category, quantity, description, town, photo, status)
-                VALUES (:donor_id, :title, :category, :quantity, :description, :town, :photo, 'available')
+                INSERT INTO donations (donor_id, title, category, quantity, description, town, img_url, status)
+                VALUES (:donor_id, :title, :category, :quantity, :description, :town, :img_url, 'available')
             ");
             $stmt->execute([
                 'donor_id'    => $donor_id,
@@ -109,7 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 'quantity'    => $quantity,
                 'description' => $description,
                 'town'        => $town,
-                'photo'       => $photo_path,
+                'img_url'     => $photo_path,
             ]);
             
             $new_id = $pdo->lastInsertId();
@@ -237,10 +237,10 @@ if (isset($_GET['success']) && $_GET['success'] == 1 && isset($_GET['id'])) {
                 </div>
 
                 <!-- Uploaded Photo if exists -->
-                <?php if ($donation['photo']): ?>
+                <?php if (!empty($donation['img_url'])): ?>
                     <div style="margin-bottom: 35px; text-align: center;">
                         <h4 style="font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 15px; color: #555; text-align: left;">Uploaded Item Reference Photo</h4>
-                        <img src="<?php echo BASE_URL . $donation['photo']; ?>" alt="Donation item" style="max-width: 100%; max-height: 250px; border-radius: 12px; border: 2px solid #e8f5e9; box-shadow: 0 4px 15px rgba(0,0,0,0.05); object-fit: cover;">
+                        <img src="<?php echo BASE_URL . $donation['img_url']; ?>" alt="Donation item" style="max-width: 100%; max-height: 250px; border-radius: 12px; border: 2px solid #e8f5e9; box-shadow: 0 4px 15px rgba(0,0,0,0.05); object-fit: cover;">
                     </div>
                 <?php endif; ?>
 

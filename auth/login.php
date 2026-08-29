@@ -26,6 +26,10 @@ include_once "../includes/header.php";
             </div>
 
 
+            <div class="form-group forgot-pass-group">
+                <a href="forgot_password.php" class="forgot-pass-link">Forgot Password?</a>
+            </div>
+
             <button type="submit">Login</button>
 
             <p>

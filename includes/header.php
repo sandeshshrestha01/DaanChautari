@@ -98,7 +98,7 @@ if (isset($_SESSION['user_id'])) {
                             <button class="profile-chip" id="profileChipBtn">
                                 <div class="avatar">
                                     <?php if ($user_profile && !empty($user_profile['profile_photo'])): ?>
-                                        <img src="<?php echo BASE_URL . htmlspecialchars($user_profile['profile_photo']); ?>" alt="Profile" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                                        <img src="<?php echo BASE_URL . htmlspecialchars($user_profile['profile_photo']); ?>" alt="Profile">
                                     <?php else: ?>
                                         <?php echo htmlspecialchars(strtoupper(substr($_SESSION['user_name'], 0, 1))); ?>
                                     <?php endif; ?>

@@ -79,8 +79,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
         try {
             $stmt = $pdo->prepare("
-                INSERT INTO donations (donor_id, title, category, quantity, description, town, photo, status)
-                VALUES (:donor_id, :title, :category, :quantity, :description, :town, :photo, 'available')
+                INSERT INTO donations (donor_id, title, category, quantity, description, town, img_url, status)
+                VALUES (:donor_id, :title, :category, :quantity, :description, :town, :img_url, 'available')
             ");
             $stmt->execute([
                 'donor_id'    => $donor_id,
@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 'quantity'    => $quantity,
                 'description' => $description,
                 'town'        => $town,
-                'photo'       => $photo_path,
+                'img_url'     => $photo_path,
             ]);
             ajax_respond(true, "Your donation \"$title\" has been listed successfully!", $is_ajax);
         } catch (PDOException $e) {
@@ -105,13 +105,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $del_id = (int)($_POST['donation_id'] ?? 0);
     if ($del_id) {
         try {
-            // 1. Fetch donation photo to delete image file from assets/images/donations/
-            $stmt = $pdo->prepare("SELECT photo FROM donations WHERE donation_id = :id AND donor_id = :donor_id");
+            // 1. Fetch donation image to delete image file from assets/images/donations/
+            $stmt = $pdo->prepare("SELECT img_url FROM donations WHERE donation_id = :id AND donor_id = :donor_id");
             $stmt->execute(['id' => $del_id, 'donor_id' => $donor_id]);
             $item_to_delete = $stmt->fetch();
 
-            if ($item_to_delete && !empty($item_to_delete['photo'])) {
-                $photo_filename = basename($item_to_delete['photo']);
+            if ($item_to_delete && !empty($item_to_delete['img_url'])) {
+                $photo_filename = basename($item_to_delete['img_url']);
                 $target_image_path = __DIR__ . '/../assets/images/donations/' . $photo_filename;
                 if (file_exists($target_image_path)) {
                     @unlink($target_image_path);
@@ -164,7 +164,7 @@ try {
 // ── Fetch My Donations ────────────────────────────────────────────────────────
 try {
     $stmt = $pdo->prepare("
-        SELECT donation_id, title, category, quantity, town, status, donated_at, description, photo
+        SELECT donation_id, title, category, quantity, town, status, donated_at, description, img_url
         FROM donations
         WHERE donor_id = :id
         ORDER BY donated_at DESC

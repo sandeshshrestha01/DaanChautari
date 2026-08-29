@@ -20,9 +20,31 @@ if (($_SESSION['user_role'] ?? '') !== 'recipient') {
     exit;
 }
 
-$recipient_id   = $_SESSION['user_id'];
+$user_id        = $_SESSION['user_id'];
 $recipient_name = $_SESSION['user_name'];
 $user_town      = $_SESSION['town'] ?? '';
+
+// Fetch primary key recipient_id from `recipients` table corresponding to logged-in user_id
+try {
+    $stmt_rec = $pdo->prepare("SELECT recipient_id FROM recipients WHERE user_id = :u_id");
+    $stmt_rec->execute(['u_id' => $user_id]);
+    $recipient_info = $stmt_rec->fetch();
+
+    if ($recipient_info) {
+        $recipient_id = $recipient_info['recipient_id'];
+    } else {
+        // Auto-create recipients profile entry if user registered/switched role without creating a recipients entry
+        $ins_rec = $pdo->prepare("INSERT INTO recipients (user_id, town, address) VALUES (:u_id, :town, :address)");
+        $ins_rec->execute([
+            'u_id'    => $user_id,
+            'town'    => !empty($user_town) ? $user_town : 'Kathmandu',
+            'address' => $_SESSION['address'] ?? ''
+        ]);
+        $recipient_id = $pdo->lastInsertId();
+    }
+} catch (PDOException $e) {
+    $recipient_id = $user_id;
+}
 
 // Fetch Dynamic Categories from Database
 $default_cats = ['Food', 'Clothing', 'Education', 'Essential Needs'];
@@ -50,10 +72,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
     if ($title && !empty($category) && $quantity > 0 && $town && $message) {
         try {
-            // Find any matching existing available donation or log a request
-            // We store support requests in donation_requests with a general message / note
-            // For general requests without a specific donation_id upfront, we can find/associate or insert.
-            
             // Check if there is an available donation matching title/category in same town
             $find = $pdo->prepare("
                 SELECT donation_id FROM donations 
@@ -66,11 +84,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             if ($matched) {
                 $donation_id = $matched['donation_id'];
             } else {
-                // If no direct item available yet, match with the latest available donation in category or fallback 1
+                // If no direct item available yet, match with the latest available donation or fall back gracefully
                 $fallback = $pdo->prepare("SELECT donation_id FROM donations WHERE status = 'available' ORDER BY donated_at DESC LIMIT 1");
                 $fallback->execute();
                 $fb = $fallback->fetch();
-                $donation_id = $fb ? $fb['donation_id'] : 1;
+                if ($fb) {
+                    $donation_id = $fb['donation_id'];
+                } else {
+                    // If no donations exist in database yet, pick first donation or handle gracefully
+                    $any = $pdo->query("SELECT donation_id FROM donations ORDER BY donation_id ASC LIMIT 1")->fetch();
+                    $donation_id = $any ? $any['donation_id'] : 1;
+                }
             }
 
             $stmt = $pdo->prepare("
@@ -90,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             header("Location: recipient_dashboard.php");
             exit;
         } catch (PDOException $e) {
-            set_flash_message('error', 'Could not submit request. Item is not available');
+            set_flash_message('error', 'Could not submit request. Please try again.');
         }
     } else {
         set_flash_message('error', 'Please fill in all required fields.');
@@ -105,10 +129,10 @@ include_once "../includes/header.php";
 ?>
 
 <div class="dashboard-wrapper recipient-page-wrap">
-    <div style="max-width: 750px; margin: 0 auto; animation: slideUp 0.4s ease-out;">
+    <div class="request-aid-card-wrap">
         
         <!-- Header Banner -->
-        <div class="db-header-banner" style="margin-bottom: 25px;">
+        <div class="db-header-banner request-aid-header-banner">
             <div class="db-header-text">
                 <h2>🤝 Request Support</h2>
                 <p>Let community donors know what items or essential support you need assistance with.</p>
@@ -119,21 +143,21 @@ include_once "../includes/header.php";
         </div>
 
         <!-- Form Card Wrapper -->
-        <div class="db-panel" style="box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-radius: 16px; background: #ffffff; padding: 30px; border: 1px solid var(--border-color);">
-            <form method="POST" action="request_aid.php" style="margin: 0; display: flex; flex-direction: column; gap: 20px;">
+        <div class="db-panel request-aid-form-card">
+            <form method="POST" action="request_aid.php" class="request-aid-form">
                 <input type="hidden" name="action" value="request_support">
 
                 <!-- Title / Needed Item -->
-                <div class="form-group" style="margin: 0;">
-                    <label for="req_title" style="font-size: 14px; font-weight: 600; color: #333;">Needed Item / Support Title <span style="color:#c62828;">*</span></label>
-                    <input type="text" id="req_title" name="title" class="form-control" placeholder="e.g. Winter Clothes for Family of 4, School Notebooks..." required maxlength="150" style="padding: 12px;">
+                <div class="form-group request-aid-form-group">
+                    <label for="req_title" class="request-aid-label">Needed Item / Support Title <span class="req">*</span></label>
+                    <input type="text" id="req_title" name="title" class="form-control request-aid-input" placeholder="e.g. Winter Clothes for Family of 4, School Notebooks..." required maxlength="150">
                 </div>
 
                 <!-- Category & Quantity Row -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div class="form-group" style="margin: 0;">
-                        <label for="req_category" style="font-size: 14px; font-weight: 600; color: #333;">Category <span style="color:#c62828;">*</span></label>
-                        <select id="req_category" name="category" class="form-control" required style="padding: 12px; height: auto;" onchange="toggleCustomCategory(this, 'req_custom_cat_wrap')">
+                <div class="request-aid-grid-2">
+                    <div class="form-group request-aid-form-group">
+                        <label for="req_category" class="request-aid-label">Category <span class="req">*</span></label>
+                        <select id="req_category" name="category" class="form-control request-aid-select" required onchange="toggleCustomCategory(this, 'req_custom_cat_wrap')">
                             <option value="">— Select Category —</option>
                             <?php foreach ($categories as $cat): ?>
                                 <option value="<?php echo htmlspecialchars($cat); ?>">
@@ -143,28 +167,28 @@ include_once "../includes/header.php";
                             <option value="Other">➕ Other</option>
                         </select>
                     </div>
-                    <div class="form-group" style="margin: 0;">
-                        <label for="req_quantity" style="font-size: 14px; font-weight: 600; color: #333;">Quantity Needed <span style="color:#c62828;">*</span></label>
-                        <input type="number" id="req_quantity" name="quantity" class="form-control" min="1" value="1" required style="padding: 12px;">
+                    <div class="form-group request-aid-form-group">
+                        <label for="req_quantity" class="request-aid-label">Quantity Needed <span class="req">*</span></label>
+                        <input type="number" id="req_quantity" name="quantity" class="form-control request-aid-input" min="1" value="1" required>
                     </div>
                 </div>
 
                 <!-- Custom Category Input -->
-                <div class="form-group" id="req_custom_cat_wrap" style="display:none; margin: 0;">
-                    <label for="req_custom_category" style="font-size:13px; font-weight:600; color:#2e7d32;">Specify Custom Category <span style="color:#c62828;">*</span></label>
-                    <input type="text" id="req_custom_category" name="custom_category" class="form-control" placeholder="e.g. Medical Supplies, Household Items..." maxlength="50" style="padding: 12px; border-color:#a5d6a7; background:#f1f8e9;">
+                <div class="form-group request-aid-form-group request-aid-custom-cat" id="req_custom_cat_wrap">
+                    <label for="req_custom_category" class="request-aid-label-custom">Specify Custom Category <span class="req">*</span></label>
+                    <input type="text" id="req_custom_category" name="custom_category" class="form-control request-aid-input-custom" placeholder="e.g. Medical Supplies, Household Items..." maxlength="50">
                 </div>
 
                 <!-- Location Town & Urgency Row -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div class="form-group" style="margin: 0;">
-                        <label for="req_town" style="font-size: 14px; font-weight: 600; color: #333;">Your Town / Location <span style="color:#c62828;">*</span></label>
-                        <input type="text" id="req_town" name="town" class="form-control" value="<?php echo htmlspecialchars($user_town); ?>" placeholder="e.g. Kathmandu" required maxlength="100" style="padding: 12px;">
+                <div class="request-aid-grid-2">
+                    <div class="form-group request-aid-form-group">
+                        <label for="req_town" class="request-aid-label">Your Town / Location <span class="req">*</span></label>
+                        <input type="text" id="req_town" name="town" class="form-control request-aid-input" value="<?php echo htmlspecialchars($user_town); ?>" placeholder="e.g. Kathmandu" required maxlength="100">
                     </div>
 
-                    <div class="form-group" style="margin: 0;">
-                        <label for="req_urgency" style="font-size: 14px; font-weight: 600; color: #333;">Urgency Level <span style="color:#c62828;">*</span></label>
-                        <select id="req_urgency" name="urgency" class="form-control" required style="padding: 12px; height: auto;">
+                    <div class="form-group request-aid-form-group">
+                        <label for="req_urgency" class="request-aid-label">Urgency Level <span class="req">*</span></label>
+                        <select id="req_urgency" name="urgency" class="form-control request-aid-select" required>
                             <option value="Low">Low (Within this month)</option>
                             <option value="Medium" selected>Medium (Within a week)</option>
                             <option value="High">High (Immediate / Urgent)</option>
@@ -173,20 +197,20 @@ include_once "../includes/header.php";
                 </div>
 
                 <!-- Request Reason / Details -->
-                <div class="form-group" style="margin: 0;">
-                    <label for="req_msg" style="font-size: 14px; font-weight: 600; color: #333;">Description & Reason for Request <span style="color:#c62828;">*</span></label>
-                    <textarea id="req_msg" name="message" class="form-control" rows="4" required placeholder="Please describe why you need this assistance and any details (size, condition needed, preferred pickup location)..." style="resize:vertical; padding: 12px;"></textarea>
+                <div class="form-group request-aid-form-group">
+                    <label for="req_msg" class="request-aid-label">Description & Reason for Request <span class="req">*</span></label>
+                    <textarea id="req_msg" name="message" class="form-control request-aid-textarea" rows="4" required placeholder="Please describe why you need this assistance and any details (size, condition needed, preferred pickup location)..."></textarea>
                 </div>
 
                 <!-- Submit Button -->
-                <button type="submit" class="btn-primary-db" style="width:100%; border-radius:10px; padding:15px; font-size:16px; font-weight:600; margin-top:10px; cursor: pointer; border: none;">
+                <button type="submit" class="btn-primary-db request-aid-submit-btn">
                     🚀 Post Support Request
                 </button>
             </form>
         </div>
 
         <!-- Tip Box -->
-        <div class="recipient-tips-panel" style="margin-top: 20px;">
+        <div class="recipient-tips-panel request-aid-tips">
             <div class="recipient-tips-title">
                 💡 Advice for Clear Requests
             </div>

@@ -332,3 +332,76 @@ body {
     font-weight: 400;
     line-height: 1.4;
 }
+
+/* Auth Page Utilities & Helpers */
+.form-error {
+    background: #ffebee;
+    color: #c62828;
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.auth-desc {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.signup-hero-text {
+    margin-top: 20px;
+    font-size: 0.9rem;
+    opacity: 0.8;
+    max-width: 280px;
+    line-height: 1.6;
+}
+
+.forgot-pass-group {
+    text-align: right;
+    margin-top: -5px;
+    margin-bottom: 15px;
+}
+
+.forgot-pass-link {
+    color: var(--primary-green);
+    font-size: 14px;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.forgot-pass-link:hover {
+    text-decoration: underline;
+}
+
+.otp-input {
+    letter-spacing: 6px;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.auth-links-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.link-green {
+    color: var(--primary-green);
+    text-decoration: none;
+}
+
+.link-green:hover {
+    text-decoration: underline;
+}
+
+.link-muted {
+    color: #666;
+    text-decoration: none;
+}
+
+.link-muted:hover {
+    text-decoration: underline;
+}

@@ -46,13 +46,15 @@ CREATE TABLE IF NOT EXISTS users (
     address        VARCHAR(255)  DEFAULT NULL,
     role           ENUM('donor','recipient','admin') NOT NULL,
     profile_photo  VARCHAR(255)  DEFAULT NULL COMMENT 'profile image file path',
+    reset_otp      VARCHAR(6)    DEFAULT NULL COMMENT '6-digit password reset OTP',
+    otp_expiry     DATETIME      DEFAULT NULL COMMENT 'Expiration timestamp for OTP',
     status         ENUM('active','inactive') NOT NULL DEFAULT 'active',
     created_at     TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
     updated_at     TIMESTAMP     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ";  
 
-// 3. RECIPIENTS TABLE
+// 2. RECIPIENTS TABLE
 $tables['recipients'] = "
 CREATE TABLE IF NOT EXISTS recipients (
     recipient_id   INT           AUTO_INCREMENT PRIMARY KEY,
@@ -69,7 +71,7 @@ CREATE TABLE IF NOT EXISTS recipients (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ";
 
-// 4. DONATIONS TABLE
+// 3. DONATIONS TABLE
 $tables['donations'] = "
 CREATE TABLE IF NOT EXISTS donations (
     donation_id    INT           AUTO_INCREMENT PRIMARY KEY,
@@ -79,7 +81,7 @@ CREATE TABLE IF NOT EXISTS donations (
     quantity       INT           NOT NULL DEFAULT 1,
     description    TEXT          DEFAULT NULL,
     town           VARCHAR(100)  NOT NULL COMMENT 'Location of donation item',
-    photo          VARCHAR(255)  DEFAULT NULL COMMENT 'Image file path',
+    img_url        VARCHAR(255)  DEFAULT NULL COMMENT 'Image file path',
     status         ENUM('available','requested','approved','rejected') NOT NULL DEFAULT 'available',
     donated_at     TIMESTAMP     DEFAULT CURRENT_TIMESTAMP COMMENT 'Auto-recorded when donor submits',
     updated_at     TIMESTAMP     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -95,13 +97,14 @@ CREATE TABLE IF NOT EXISTS donations (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ";
 
-// 5. DONATION REQUESTS TABLE
+// 4. DONATION REQUESTS TABLE
 $tables['donation_requests'] = "
 CREATE TABLE IF NOT EXISTS donation_requests (
     request_id     INT           AUTO_INCREMENT PRIMARY KEY,
     donation_id    INT           NOT NULL COMMENT 'FK to donations table',
-    recipient_id   INT           NOT NULL COMMENT 'FK to users table (role=recipient)',
+    recipient_id   INT           NOT NULL COMMENT 'FK to recipients table (recipient_id)',
     message        TEXT          DEFAULT NULL COMMENT 'Message from recipient',
+    quantity       INT           NOT NULL DEFAULT 1 COMMENT 'How many items requested',
     status         ENUM('pending','approved','rejected') NOT NULL DEFAULT 'pending',
     requested_at   TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
     reviewed_at    TIMESTAMP     DEFAULT NULL COMMENT 'When admin approved or rejected',
@@ -113,7 +116,7 @@ CREATE TABLE IF NOT EXISTS donation_requests (
         ON DELETE CASCADE ON UPDATE CASCADE,
 
     CONSTRAINT fk_request_recipient
-        FOREIGN KEY (recipient_id) REFERENCES users(user_id)
+        FOREIGN KEY (recipient_id) REFERENCES recipients(recipient_id)
         ON DELETE CASCADE ON UPDATE CASCADE,
 
     CONSTRAINT fk_request_admin
@@ -127,7 +130,7 @@ CREATE TABLE IF NOT EXISTS donation_requests (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ";
 
-// 6. VOLUNTEERS TABLE
+// 5. VOLUNTEERS TABLE
 $tables['volunteers'] = "
 CREATE TABLE IF NOT EXISTS volunteers (
     volunteer_id   INT           AUTO_INCREMENT PRIMARY KEY,
@@ -148,7 +151,7 @@ CREATE TABLE IF NOT EXISTS volunteers (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ";
 
-// 6. ACTIVITY LOGS TABLE (user_id covers all roles incl. admin)
+// 6. ACTIVITY LOGS TABLE (user_id covers all roles incl. admin)  // kept as 6
 $tables['activity_logs'] = "
 CREATE TABLE IF NOT EXISTS activity_logs (
     log_id         INT           AUTO_INCREMENT PRIMARY KEY,
@@ -177,6 +180,23 @@ foreach ($tables as $table_name => $sql) {
     } catch (PDOException $e) {
         $results[] = ['table' => $table_name, 'status' => 'error', 'msg' => $e->getMessage()];
     }
+}
+
+// ── Check & migrate column photo -> img_url in donations table ─────────────
+try {
+    $cols = $pdo->query("SHOW COLUMNS FROM donations LIKE 'photo'")->fetchAll();
+    if (!empty($cols)) {
+        $pdo->exec("ALTER TABLE donations CHANGE COLUMN photo img_url VARCHAR(255) DEFAULT NULL COMMENT 'Image file path'");
+        $results[] = ['table' => 'donations (column update)', 'status' => 'ok', 'msg' => 'Renamed column photo -> img_url'];
+    } else {
+        $img_cols = $pdo->query("SHOW COLUMNS FROM donations LIKE 'img_url'")->fetchAll();
+        if (empty($img_cols)) {
+            $pdo->exec("ALTER TABLE donations ADD COLUMN img_url VARCHAR(255) DEFAULT NULL COMMENT 'Image file path' AFTER town");
+            $results[] = ['table' => 'donations (column update)', 'status' => 'ok', 'msg' => 'Added missing column img_url'];
+        }
+    }
+} catch (PDOException $e) {
+    $results[] = ['table' => 'donations (column update)', 'status' => 'error', 'msg' => $e->getMessage()];
 }
 
 // ── Seed default admin into users table (only if no admin exists) ────────────
@@ -216,69 +236,7 @@ if (php_sapi_name() === 'cli') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Migration — Dan Chautari</title>
-    <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #f4f7f4;
-            color: #333;
-            padding: 40px 20px;
-        }
-        .container {
-            max-width: 680px;
-            margin: 0 auto;
-        }
-        h1 {
-            font-size: 22px;
-            color: #1b5e20;
-            margin-bottom: 6px;
-        }
-        .subtitle {
-            font-size: 13px;
-            color: #777;
-            margin-bottom: 28px;
-        }
-        .subtitle span {
-            font-weight: 600;
-            color: #2e7d32;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #fff;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.07);
-        }
-        thead tr {
-            background: #2e7d32;
-            color: #fff;
-        }
-        th, td {
-            padding: 13px 18px;
-            text-align: left;
-            font-size: 14px;
-        }
-        tbody tr:nth-child(even) { background: #f9fbf9; }
-        tbody tr:hover           { background: #eef7ee; }
-        .badge {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        .badge-ok    { background: #e8f5e9; color: #2e7d32; }
-        .badge-error { background: #ffebee; color: #c62828; }
-        .badge-skip  { background: #fff8e1; color: #f57f17; }
-        .msg { color: #555; font-size: 13px; }
-        .footer-note {
-            margin-top: 20px;
-            font-size: 12px;
-            color: #aaa;
-            text-align: center;
-        }
-    </style>
+    <link rel="stylesheet" href="../assets/css/migration.css">
 </head>
 <body>
 <div class="container">

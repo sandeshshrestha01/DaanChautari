@@ -949,6 +949,44 @@ body.admin-body {
   flex-shrink: 0;
 }
 
+/* Admin Dashboard Utilities */
+.topbar-user-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dash-panel-mt {
+  margin-top: 22px;
+}
+
+.td-empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 28px;
+}
+
+.dact-form {
+  margin: 0;
+}
+
+.reviewed-text {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.no-activity-text {
+  color: var(--muted);
+  font-size: 12px;
+  padding: 16px 0;
+}
+
+.no-data-text {
+  color: #aaa;
+  font-size: 12px;
+}
+
+
 .dq-green  { background: #e8f5e9; }
 .dq-blue   { background: #e3f2fd; }
 .dq-teal   { background: #e0f2f1; }

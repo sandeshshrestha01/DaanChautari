@@ -23,6 +23,8 @@ CREATE TABLE users (
     address        VARCHAR(255)  DEFAULT NULL,
     role           ENUM('donor','recipient','admin') NOT NULL,
     profile_photo  VARCHAR(255)  DEFAULT NULL COMMENT 'profile image file path',
+    reset_otp      VARCHAR(6)    DEFAULT NULL COMMENT '6-digit password reset OTP',
+    otp_expiry     DATETIME      DEFAULT NULL COMMENT 'Expiration timestamp for OTP',
     status         ENUM('active','inactive') NOT NULL DEFAULT 'active',
     created_at     TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
     updated_at     TIMESTAMP     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -70,7 +72,7 @@ CREATE TABLE donations (
     quantity       INT           NOT NULL DEFAULT 1,
     description    TEXT          DEFAULT NULL,
     town           VARCHAR(100)  NOT NULL COMMENT 'Location of donation item',
-    photo          VARCHAR(255)  DEFAULT NULL COMMENT 'Image file path',
+    img_url        VARCHAR(255)  DEFAULT NULL COMMENT 'Image file path',
     status         ENUM(
                        'available',
                        'requested',
@@ -103,8 +105,9 @@ CREATE TABLE donations (
 CREATE TABLE donation_requests (
     request_id     INT           AUTO_INCREMENT PRIMARY KEY,
     donation_id    INT           NOT NULL COMMENT 'FK to donations table',
-    recipient_id   INT           NOT NULL COMMENT 'FK to users table (role=recipient)',
+    recipient_id   INT           NOT NULL COMMENT 'FK to recipients table (recipient_id)',
     message        TEXT          DEFAULT NULL COMMENT 'Message from recipient to admin/donor',
+    quantity       INT           NOT NULL DEFAULT 1 COMMENT 'How many items requested',
     status         ENUM(
                        'pending',
                        'approved',
@@ -125,7 +128,7 @@ CREATE TABLE donation_requests (
 
     CONSTRAINT fk_request_recipient
         FOREIGN KEY (recipient_id)
-        REFERENCES users(user_id)
+        REFERENCES recipients(recipient_id)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
 
@@ -258,7 +261,7 @@ VALUES (
 
 -- Recent donations for home page:
 -- SELECT d.donation_id, u.full_name AS donor, d.title,
---        d.category, d.town, d.quantity, d.photo, d.donated_at
+--        d.category, d.town, d.quantity, d.img_url, d.donated_at
 -- FROM donations d
 -- JOIN users u ON d.donor_id = u.user_id
 -- WHERE d.status = 'available'

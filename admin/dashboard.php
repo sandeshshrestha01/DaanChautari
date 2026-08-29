@@ -4,6 +4,77 @@
  * Overview stats, recent donations table, donation requests, quick actions, recent activity.
  */
 
+// ── Handle POST BEFORE any output ─────────────────────────────────────────────
+require_once __DIR__ . '/../database/config.php';
+require_once __DIR__ . '/../database/db.php';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_request'])) {
+    $req_id    = (int)($_POST['request_id'] ?? 0);
+    $newstatus = in_array($_POST['new_status'] ?? '', ['approved','rejected','pending'])
+                 ? $_POST['new_status'] : 'pending';
+    try {
+        $donation_id   = null;
+        $total_don_qty = 0;
+
+        if ($newstatus === 'approved') {
+            // Check donated item total quantity vs already approved requested quantity + current request quantity
+            $chk_stmt = $pdo->prepare("
+                SELECT dr.donation_id, dr.quantity AS req_qty, d.quantity AS total_don_qty 
+                FROM donation_requests dr 
+                JOIN donations d ON dr.donation_id = d.donation_id 
+                WHERE dr.request_id = :r
+            ");
+            $chk_stmt->execute(['r' => $req_id]);
+            $qty_info = $chk_stmt->fetch();
+
+            if ($qty_info) {
+                $donation_id   = (int)$qty_info['donation_id'];
+                $total_don_qty = (int)$qty_info['total_don_qty'];
+                $req_qty       = (int)$qty_info['req_qty'];
+
+                // Calculate sum of already approved request quantities for this donation item
+                $approved_stmt = $pdo->prepare("
+                    SELECT COALESCE(SUM(quantity), 0) FROM donation_requests 
+                    WHERE donation_id = :d_id AND status = 'approved' AND request_id != :r
+                ");
+                $approved_stmt->execute(['d_id' => $donation_id, 'r' => $req_id]);
+                $already_approved_qty = (int)$approved_stmt->fetchColumn();
+
+                $remaining_qty = $total_don_qty - $already_approved_qty;
+
+                if ($req_qty > $remaining_qty) {
+                    $_SESSION['sweetalert_error'] = "Cannot approve request! Requested quantity ($req_qty) exceeds available stock ($remaining_qty remaining out of $total_don_qty total). Ask donor to add more stock.";
+                    header("Location: dashboard.php");
+                    exit;
+                }
+            }
+        }
+
+        $pdo->prepare("UPDATE donation_requests SET status = :s, reviewed_at = NOW(), reviewed_by = :a WHERE request_id = :r")
+            ->execute(['s' => $newstatus, 'a' => $_SESSION['user_id'], 'r' => $req_id]);
+
+        if ($newstatus === 'approved' && $donation_id !== null) {
+            // Check if all donated quantity has been allocated
+            $approved_stmt = $pdo->prepare("
+                SELECT COALESCE(SUM(quantity), 0) FROM donation_requests 
+                WHERE donation_id = :d_id AND status = 'approved'
+            ");
+            $approved_stmt->execute(['d_id' => $donation_id]);
+            $total_approved = (int)$approved_stmt->fetchColumn();
+
+            if ($total_approved >= $total_don_qty) {
+                $pdo->prepare("UPDATE donations SET status = 'approved' WHERE donation_id = :d_id")
+                    ->execute(['d_id' => $donation_id]);
+            }
+        }
+        set_flash_message('success', "Request #REQ-$req_id updated to " . strtoupper($newstatus));
+    } catch (PDOException $e) {
+        set_flash_message('error', 'Could not update request status.');
+    }
+    header("Location: dashboard.php");
+    exit;
+}
+
 $page_title = 'Dashboard';
 require_once __DIR__ . '/admin_header.php';
 
@@ -11,7 +82,7 @@ require_once __DIR__ . '/admin_header.php';
 try {
     $total_donations = (int)$pdo->query("SELECT COUNT(*) FROM donations")->fetchColumn();
     $pending_req     = (int)$pdo->query("SELECT COUNT(*) FROM donation_requests WHERE status = 'pending'")->fetchColumn();
-    $total_users     = (int)$pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
+    $total_users     = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE role IN ('donor', 'recipient')")->fetchColumn();
     $active_vols     = (int)$pdo->query("SELECT COUNT(*) FROM volunteers WHERE status = 'active'")->fetchColumn();
 
     // Recent donations (last 5)
@@ -26,13 +97,14 @@ try {
 
     // Donation requests awaiting response (pending, limit 5)
     $pending_requests = $pdo->query("
-        SELECT dr.request_id, dr.status, dr.requested_at,
-               d.title AS item_requested,
+        SELECT dr.request_id, dr.quantity AS req_quantity, dr.status, dr.requested_at,
+               d.title AS item_requested, d.quantity AS don_quantity,
                donor.full_name AS donor_name,
                recip.full_name AS requester_name
         FROM donation_requests dr
         JOIN donations d ON dr.donation_id = d.donation_id
-        JOIN users recip ON dr.recipient_id = recip.user_id
+        JOIN recipients r ON dr.recipient_id = r.recipient_id
+        JOIN users recip ON r.user_id = recip.user_id
         JOIN users donor ON d.donor_id = donor.user_id
         ORDER BY dr.requested_at DESC
         LIMIT 5
@@ -85,25 +157,8 @@ try {
     $req_status_map = [];
 }
 
-// Handle request status update
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_request'])) {
-    $req_id    = (int)($_POST['request_id'] ?? 0);
-    $newstatus = in_array($_POST['new_status'] ?? '', ['approved','rejected','pending'])
-                 ? $_POST['new_status'] : 'pending';
-    try {
-        $pdo->prepare("UPDATE donation_requests SET status = :s, reviewed_at = NOW(), reviewed_by = :a WHERE request_id = :r")
-            ->execute(['s' => $newstatus, 'a' => $_SESSION['user_id'], 'r' => $req_id]);
-        if ($newstatus === 'approved') {
-            $pdo->prepare("UPDATE donations d JOIN donation_requests dr ON d.donation_id = dr.donation_id SET d.status = 'approved' WHERE dr.request_id = :r")
-                ->execute(['r' => $req_id]);
-        }
-        set_flash_message('success', "Request #REQ-$req_id updated to " . strtoupper($newstatus));
-    } catch (PDOException $e) {
-        set_flash_message('error', 'Could not update request status.');
-    }
-    header("Location: dashboard.php");
-    exit;
-}
+
+
 ?>
 
 <!-- ── Dashboard Header ────────────────────────────────────── -->
@@ -180,7 +235,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_request'])) {
                     </thead>
                     <tbody>
                     <?php if (empty($recent_donations)): ?>
-                        <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:28px;">No donations yet.</td></tr>
+                        <tr><td colspan="5" class="td-empty">No donations yet.</td></tr>
                     <?php else: ?>
                         <?php foreach ($recent_donations as $d):
                             $s = $d['status'];
@@ -207,7 +262,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_request'])) {
         </div>
 
         <!-- Donation Requests Awaiting Response + Pie Chart -->
-        <div class="dash-panel" style="margin-top:22px;">
+        <div class="dash-panel dash-panel-mt">
             <div class="dpanel-hdr">
                 <div>
                     <h3 class="dpanel-title">Donation Requests Awaiting Response</h3>
@@ -237,7 +292,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_request'])) {
                     </thead>
                     <tbody>
                     <?php if (empty($pending_requests)): ?>
-                        <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:28px;">No pending requests.</td></tr>
+                        <tr><td colspan="5" class="td-empty">No pending requests.</td></tr>
                     <?php else: ?>
                         <?php foreach ($pending_requests as $req):
                             $rs = $req['status'];
@@ -262,13 +317,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_request'])) {
                             <td>
                                 <?php if ($rs === 'pending'): ?>
                                 <div class="dreq-actions">
-                                    <form method="POST" style="margin:0;">
+                                    <form method="POST" class="dact-form">
                                         <input type="hidden" name="update_request" value="1">
                                         <input type="hidden" name="request_id" value="<?php echo $req['request_id']; ?>">
                                         <input type="hidden" name="new_status" value="approved">
                                         <button type="submit" class="dact-btn dact-approve">Approve</button>
                                     </form>
-                                    <form method="POST" style="margin:0;" onsubmit="return confirm('Reject this request?')">
+                                    <form method="POST" class="dact-form" onsubmit="return confirm('Reject this request?')">
                                         <input type="hidden" name="update_request" value="1">
                                         <input type="hidden" name="request_id" value="<?php echo $req['request_id']; ?>">
                                         <input type="hidden" name="new_status" value="rejected">
@@ -276,7 +331,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_request'])) {
                                     </form>
                                 </div>
                                 <?php else: ?>
-                                    <span style="font-size:12px;color:var(--muted);">Reviewed</span>
+                                    <span class="reviewed-text">Reviewed</span>
                                 <?php endif; ?>
                             </td>
                         </tr>
@@ -322,7 +377,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_request'])) {
         </div>
 
         <!-- Recent Activity -->
-        <div class="dash-panel" style="margin-top:22px;">
+        <div class="dash-panel dash-panel-mt">
             <div class="dpanel-hdr">
                 <h3 class="dpanel-title">Recent Activity</h3>
             </div>
@@ -364,7 +419,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_request'])) {
                     </div>
                     <?php endforeach;
                     if (empty($fallback)): ?>
-                        <p style="color:var(--muted);font-size:12px;padding:16px 0;">No recent activity.</p>
+                        <p class="no-activity-text">No recent activity.</p>
                     <?php endif; ?>
                 <?php endif; ?>
             </div>
@@ -502,5 +557,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_request'])) {
     }
 })();
 </script>
+
+<?php if (isset($_SESSION['sweetalert_error'])): ?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    Swal.fire({
+        icon: 'error',
+        title: 'Cannot Approve Request',
+        text: <?php echo json_encode($_SESSION['sweetalert_error']); ?>,
+        confirmButtonColor: '#2e7d32',
+        confirmButtonText: 'OK'
+    });
+});
+</script>
+<?php unset($_SESSION['sweetalert_error']); endif; ?>
 
 <?php require_once __DIR__ . '/admin_footer.php'; ?>

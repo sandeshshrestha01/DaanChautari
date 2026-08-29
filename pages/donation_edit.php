@@ -77,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $town        = trim($_POST['town']     ?? '');
 
     if ($title && !empty($category) && $quantity > 0 && $town) {
-        $photo_path = $donation['photo'];
+        $photo_path = $donation['img_url'];
 
         // ── Image Upload ───────────────────────────────────────────────────────
         if (!empty($_FILES['image']['name'])) {
@@ -98,8 +98,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             }
 
             // Delete previous image file from assets/images/donations/
-            if (!empty($donation['photo'])) {
-                $old_photo_filename = basename($donation['photo']);
+            if (!empty($donation['img_url'])) {
+                $old_photo_filename = basename($donation['img_url']);
                 $old_photo_filepath = $upload_dir . $old_photo_filename;
                 if (file_exists($old_photo_filepath)) {
                     @unlink($old_photo_filepath);
@@ -124,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     quantity = :quantity,
                     description = :description,
                     town = :town,
-                    photo = :photo
+                    img_url = :img_url
                 WHERE donation_id = :id AND donor_id = :donor_id AND status = 'available'
             ");
             $stmt->execute([
@@ -133,7 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 'quantity'    => $quantity,
                 'description' => $description,
                 'town'        => $town,
-                'photo'       => $photo_path,
+                'img_url'     => $photo_path,
                 'id'          => $donation_id,
                 'donor_id'    => $donor_id,
             ]);
@@ -244,10 +244,10 @@ include_once "../includes/header.php";
                            style="padding:10px; cursor:pointer;" onchange="previewEditImage(this)">
 
                     <div id="edit_image_preview_container" style="margin-top:15px; text-align:center;">
-                        <?php if ($donation['photo']): ?>
+                        <?php if (!empty($donation['img_url'])): ?>
                             <img id="edit_image_thumb"
-                                 src="<?php echo BASE_URL . $donation['photo']; ?>"
-                                 data-original-photo="<?php echo htmlspecialchars($donation['photo']); ?>"
+                                 src="<?php echo BASE_URL . $donation['img_url']; ?>"
+                                 data-original-photo="<?php echo htmlspecialchars($donation['img_url']); ?>"
                                  alt="Preview"
                                  style="max-width:100%; max-height:180px; border-radius:12px; border:2px solid #c8e6c9; padding:2px; object-fit:cover;">
                             <button type="button" id="edit_image_remove_btn" onclick="clearEditImage()"

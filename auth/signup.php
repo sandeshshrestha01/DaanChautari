@@ -8,7 +8,7 @@ include_once "../includes/header.php";
     <div class="left">
         <h1>Join Daan <span class="yellow-text">Chautari</span></h1>
         <p>Daan Garaun, Sahara Banaun</p>
-        <p style="margin-top:20px; font-size:0.9rem; opacity:0.8; max-width:280px; line-height:1.6;">
+        <p class="signup-hero-text">
             Connect with a community that shares goods and kindness — no money, only support.
         </p>
     </div>

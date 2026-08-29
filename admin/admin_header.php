@@ -22,46 +22,54 @@ $page_title    = $page_title ?? 'Dashboard';
 $flash = get_flash_message();
 
 // Helper: category emoji
-function cat_emoji(string $cat): string {
-    return match($cat) {
-        'Clothing'       => '👕',
-        'Education'      => '📚',
-        'Food'           => '🍱',
-        'Essential Needs'=> '🏠',
-        default          => '📦',
-    };
+if (!function_exists('cat_emoji')) {
+    function cat_emoji(string $cat): string {
+        return match($cat) {
+            'Clothing'       => '👕',
+            'Education'      => '📚',
+            'Food'           => '🍱',
+            'Essential Needs'=> '🏠',
+            default          => '📦',
+        };
+    }
 }
 
 // Helper: category badge class
-function cat_badge(string $cat): string {
-    return match($cat) {
-        'Clothing'       => 'b-clothing',
-        'Education'      => 'b-education',
-        'Food'           => 'b-food',
-        'Essential Needs'=> 'b-essential',
-        default          => 'b-essential',
-    };
+if (!function_exists('cat_badge')) {
+    function cat_badge(string $cat): string {
+        return match($cat) {
+            'Clothing'       => 'b-clothing',
+            'Education'      => 'b-education',
+            'Food'           => 'b-food',
+            'Essential Needs'=> 'b-essential',
+            default          => 'b-essential',
+        };
+    }
 }
 
 // Helper: status badge class
-function status_badge(string $status): string {
-    return match($status) {
-        'available' => 'b-available',
-        'requested' => 'b-requested',
-        'approved'  => 'b-approved',
-        'rejected'  => 'b-rejected',
-        'pending'   => 'b-pending',
-        'active'    => 'b-active',
-        'inactive'  => 'b-inactive',
-        default     => 'b-inactive',
-    };
+if (!function_exists('status_badge')) {
+    function status_badge(string $status): string {
+        return match($status) {
+            'available' => 'b-available',
+            'requested' => 'b-requested',
+            'approved'  => 'b-approved',
+            'rejected'  => 'b-rejected',
+            'pending'   => 'b-pending',
+            'active'    => 'b-active',
+            'inactive'  => 'b-inactive',
+            default     => 'b-inactive',
+        };
+    }
 }
 
 // Helper: build photo src
-function item_photo_src(?string $photo, string $base): string {
-    if (empty($photo)) return '';
-    if (str_starts_with($photo, 'http')) return $photo;
-    return $base . ltrim($photo, '/');
+if (!function_exists('item_photo_src')) {
+    function item_photo_src(?string $photo, string $base): string {
+        if (empty($photo)) return '';
+        if (str_starts_with($photo, 'http')) return $photo;
+        return $base . ltrim($photo, '/');
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -183,7 +191,7 @@ function item_photo_src(?string $photo, string $base): string {
 
     <!-- Top Bar -->
     <div class="admin-topbar">
-        <div style="display:flex;align-items:center;gap:12px;">
+        <div class="topbar-user-wrap">
             <button class="sidebar-toggle-btn" id="sidebarToggle">☰</button>
             <div class="topbar-left">
                 <h1><?php echo htmlspecialchars($page_title); ?></h1>

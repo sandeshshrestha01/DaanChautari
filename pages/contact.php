@@ -54,16 +54,26 @@ try {
     $mail->isHTML(true);                                  //Set email format to HTML
     $mail->Subject = $subject;
     $mail->Body = "
-<h2>New Contact Message</h2>
+<div style=\"font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 550px; margin: 0 auto; padding: 25px; border: 1px solid #e0e0e0; border-radius: 12px; background-color: #ffffff;\">
+    <div style=\"text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #2e7d32;\">
+        <h2 style=\"color: #2e7d32; margin: 0; font-size: 26px;\">Daan Chautari</h2>
+        <p style=\"color: #666; font-size: 14px; margin-top: 4px;\">Sahayogko Chautari, Aashako Yatra</p>
+    </div>
+    <h3 style=\"color: #1a2618; margin-top: 15px; margin-bottom: 20px; font-size: 20px;\">New Contact Inquiry</h3>
 
-<b>Name:</b> {$name}<br>
-<b>Email:</b> {$email}<br>
-<b>Subject:</b> {$subject}<br><br>
-<b>Inquiry Type:</b> {$type}<br><br>
-
-<b>Message:</b><br>
-" . nl2br(htmlspecialchars($message));
+    <p style=\"margin: 8px 0; font-size: 15px;\"><b>Name:</b> " . htmlspecialchars($name) . "</p>
+    <p style=\"margin: 8px 0; font-size: 15px;\"><b>Email:</b> " . htmlspecialchars($email) . "</p>
+    <p style=\"margin: 8px 0; font-size: 15px;\"><b>Subject:</b> " . htmlspecialchars($subject) . "</p>
+    <p style=\"margin: 8px 0; font-size: 15px;\"><b>Inquiry Type:</b> " . htmlspecialchars(ucfirst($type)) . "</p>
     
+    <hr style=\"border: none; border-top: 1px solid #eee; margin: 20px 0;\">
+    
+    <p style=\"margin: 8px 0; font-size: 15px;\"><b>Message:</b></p>
+    <div style=\"background: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 4px solid #2e7d32; font-size: 14px; line-height: 1.6; color: #333;\">
+        " . nl2br(htmlspecialchars($message)) . "
+    </div>
+</div>";
+
 
    if ($mail->send()) {
     $sent = true;
