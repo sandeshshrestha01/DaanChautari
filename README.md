@@ -103,6 +103,4 @@ We have seeded rich mock records into the SQL script so you can test all roles i
 - *Accesses personal profiles showing contribution transaction logs, receipt metrics, and interactive volunteer self-enrollment toggles.*
 
 ### 3. Registered Volunteer User
-- **Email:** `volunteer@danchautari.org`
-- **Password:** `volunteer123`
-- *Accesses profile dashboards showing pre-configured volunteer badge states.*
+
