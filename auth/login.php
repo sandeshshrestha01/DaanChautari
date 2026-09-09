@@ -1,4 +1,16 @@
 <?php
+require_once __DIR__ . '/../database/config.php';
+
+// If already logged in, redirect to respective dashboard
+if (isset($_SESSION['user_id'])) {
+    if (($_SESSION['user_role'] ?? '') === 'admin') {
+        header("Location: " . BASE_URL . "admin/dashboard.php");
+    } else {
+        header("Location: " . BASE_URL . "pages/dashboard.php");
+    }
+    exit;
+}
+
 $extra_css = ['auth.css'];
 include_once "../includes/header.php";
 ?>
@@ -35,6 +47,11 @@ include_once "../includes/header.php";
             <p>
                 Don't have an account?
                 <a href="signup.php">Sign Up</a>
+            </p>
+
+            <p style="margin-top: 10px; font-size: 0.85rem; text-align: center; color: #666;">
+                Administrator?
+                <a href="admin_login.php" style="color: var(--primary-green); font-weight: 600;">Admin Login</a>
             </p>
 
         </form>

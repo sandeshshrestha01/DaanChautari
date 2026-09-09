@@ -144,7 +144,7 @@ if (!function_exists('item_photo_src')) {
         <div class="sidebar-sep">People</div>
 
         <a href="<?php echo BASE_URL; ?>admin/manage_users.php"
-           class="<?php echo $current_page === 'manage_users.php' ? 'active' : ''; ?>">
+           class="<?php echo ($current_page === 'manage_users.php' && ($_GET['role'] ?? '') !== 'volunteer') ? 'active' : ''; ?>">
             <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
                 <circle cx="9" cy="7" r="4"/>

@@ -33,24 +33,30 @@ try {
 
     if ($user && password_verify($password, $user['password'])) {
 
+        // Block admin accounts from logging in through public user login
+        if ($user['role'] === 'admin') {
+            set_flash_message('error', 'Invalid email or password. Please try again.');
+            header("Location: login.php");
+            exit;
+        }
 
-        // ── Set session variables (using new column names) ────────────────────
+        // Only donor and recipient roles are allowed
+        if ($user['role'] !== 'donor' && $user['role'] !== 'recipient') {
+            set_flash_message('error', 'Invalid account role or access restricted.');
+            header("Location: login.php");
+            exit;
+        }
+
+        // ── Establish session for regular users (donor/recipient) ────────────
+        session_regenerate_id(true);
         $_SESSION['user_id']    = $user['user_id'];
         $_SESSION['user_name']  = $user['full_name'];
         $_SESSION['user_email'] = $user['email'];
         $_SESSION['user_role']  = $user['role'];
-        
-        // Set town
-        $_SESSION['town']       = $user['town'];
+        $_SESSION['town']       = $user['town'] ?? null;
 
         set_flash_message('success', "Welcome back, {$user['full_name']}!");
-
-        // Route via central dashboard router
-        if ($user['role'] === 'admin') {
-            header("Location: " . BASE_URL . "admin/dashboard.php");
-        } else {
-            header("Location: " . BASE_URL . "pages/dashboard.php");
-        }
+        header("Location: " . BASE_URL . "pages/dashboard.php");
         exit;
 
     } else {

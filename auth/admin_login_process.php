@@ -26,12 +26,18 @@ if (!$email || empty($password)) {
 // ── Database lookup ───────────────────────────────────────────────────────────
 try {
     $stmt = $pdo->prepare(
-        "SELECT * FROM users WHERE email = :email AND role = 'admin' AND status = 'active'"
+        "SELECT * FROM users WHERE email = :email AND status = 'active'"
     );
     $stmt->execute(['email' => $email]);
     $user = $stmt->fetch();
 
     if ($user && password_verify($password, $user['password'])) {
+
+        if ($user['role'] !== 'admin') {
+            set_flash_message('error', 'Access restricted to administrators only. Donors and recipients please use the main login page.');
+            header("Location: admin_login.php");
+            exit;
+        }
 
         // ── Establish session ─────────────────────────────────────────────
         session_regenerate_id(true); // Prevent session fixation
