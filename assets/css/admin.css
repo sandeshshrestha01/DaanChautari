@@ -77,6 +77,15 @@ body.admin-body {
   margin-bottom: 4px;
 }
 
+.brand-name img,
+.brand-logo {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
 .brand-tag {
   font-size: 10.5px;
   color: var(--sidebar-text);
@@ -1785,5 +1794,164 @@ body.admin-body {
   text-transform: uppercase;
   color: var(--muted);
 }
+
+/* ─── Donation Management Extensions ─────────────────────── */
+.don-thumb-wrap {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  border-radius: 9px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #f4f7f4;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.don-thumb-wrap:hover {
+  transform: scale(1.06);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.don-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.don-thumb-placeholder {
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: #eef3ee;
+}
+
+.don-item-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.don-title-link {
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 13.5px;
+  line-height: 1.3;
+  display: block;
+}
+
+.don-title-link:hover {
+  color: var(--primary);
+}
+
+.stock-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.stock-pill-ok {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #c8e6c9;
+}
+
+.stock-pill-low {
+  background: #fff8e1;
+  color: #f57f17;
+  border: 1px solid #ffe082;
+}
+
+.stock-pill-out {
+  background: #ffebee;
+  color: #c62828;
+  border: 1px solid #ffcdd2;
+}
+
+.btn-respond-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+  background: #e3f2fd;
+  color: #0277bd;
+  border: 1px solid #bbdefb;
+  transition: all 0.15s ease;
+}
+
+.btn-respond-tag:hover {
+  background: #0277bd;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(2, 119, 189, 0.25);
+}
+
+.btn-respond-tag.has-pending {
+  background: #fff3e0;
+  color: #e65100;
+  border-color: #ffe0b2;
+}
+
+.btn-respond-tag.has-pending:hover {
+  background: #e65100;
+  color: #ffffff;
+}
+
+.req-message-box {
+  background: #f9fbf9;
+  border: 1px dashed #d1ded1;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #444;
+  margin-top: 6px;
+  line-height: 1.4;
+  max-width: 320px;
+}
+
+.don-preview-modal-img {
+  width: 100%;
+  max-height: 280px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+}
+
+.filter-badge-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  color: var(--danger);
+  text-decoration: none;
+  padding: 4px 9px;
+  border-radius: 6px;
+  background: var(--danger-lt);
+  border: 1px solid #ffcdd2;
+  font-weight: 600;
+}
+
+.filter-badge-clear:hover {
+  background: var(--danger);
+  color: #fff;
+}
+
 
 

@@ -59,6 +59,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $img_types  = ['image/jpeg','image/png','image/webp','image/gif'];
             $max_size   = 3 * 1024 * 1024; // 3 MB
             $upload_dir = __DIR__ . '/../assets/images/donations/';
+            if (!is_dir($upload_dir)) {
+                @mkdir($upload_dir, 0755, true);
+            }
 
             if (!in_array($file['type'], $img_types)) {
                 ajax_respond(false, 'Invalid image type. Allowed: JPG, PNG, WEBP, GIF.', $is_ajax);
@@ -71,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $filename = 'donation_' . uniqid() . '.' . $ext;
             $dest     = $upload_dir . $filename;
 
-            if (!move_uploaded_file($file['tmp_name'], $dest)) {
+            if (!@move_uploaded_file($file['tmp_name'], $dest)) {
                 ajax_respond(false, 'Image upload failed. Please try again.', $is_ajax);
             }
             $photo_path = 'assets/images/donations/' . $filename;
@@ -145,7 +148,7 @@ try {
     $stmt->execute(['id' => $donor_id]);
     $available_count = $stmt->fetchColumn();
 
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM donations WHERE donor_id = :id AND status = 'approved'");
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM donations WHERE donor_id = :id AND status = 'not_available'");
     $stmt->execute(['id' => $donor_id]);
     $approved_count = $stmt->fetchColumn();
 
@@ -176,15 +179,18 @@ try {
     $my_donations = [];
 }
 
-// ── Fetch Incoming Requests on My Donations ----
+// ── Fetch Incoming Requests on My Donations ───────────────────────────────────
 try {
     $stmt = $pdo->prepare("
-        SELECT dr.request_id, d.title AS donation_title, d.category,
-               u.full_name AS recipient_name, u.town AS recipient_town,
+        SELECT dr.request_id, dr.quantity AS requested_quantity, d.title AS donation_title, d.category,
+               COALESCE(u.full_name, u2.full_name, 'Unknown Requester') AS recipient_name,
+               COALESCE(r.town, u.town, u2.town, '—') AS recipient_town,
                dr.message, dr.status, dr.requested_at
         FROM donation_requests dr
-        JOIN donations d  ON dr.donation_id  = d.donation_id
-        JOIN users     u  ON dr.recipient_id = u.user_id
+        JOIN donations d        ON dr.donation_id  = d.donation_id
+        LEFT JOIN recipients r  ON dr.recipient_id = r.recipient_id
+        LEFT JOIN users      u  ON r.user_id = u.user_id
+        LEFT JOIN users      u2 ON dr.recipient_id = u2.user_id
         WHERE d.donor_id = :id
         ORDER BY dr.requested_at DESC
         LIMIT 15
@@ -198,12 +204,13 @@ try {
 // Helper: status badge CSS class
 function badge_class(string $status): string {
     return match($status) {
-        'available' => 'badge-info',
-        'approved'  => 'badge-success',
-        'requested' => 'badge-pending',
-        'rejected'  => 'badge-danger',
-        'pending'   => 'badge-pending',
-        default     => 'badge-info',
+        'available'     => 'badge-info',
+        'not_available' => 'badge-success',
+        'approved'      => 'badge-success',  // legacy fallback
+        'requested'     => 'badge-pending',
+        'rejected'      => 'badge-danger',
+        'pending'       => 'badge-pending',
+        default         => 'badge-info',
     };
 }
 
@@ -293,7 +300,7 @@ try {
                                     <td><?php echo htmlspecialchars($d['town']); ?></td>
                                     <td>
                                         <span class="badge <?php echo badge_class($d['status']); ?>">
-                                            <?php echo ucfirst($d['status']); ?>
+                                            <?php echo $d['status'] === 'not_available' ? 'Not Available' : ucfirst($d['status']); ?>
                                         </span>
                                     </td>
                                     <td style="font-size:12px; color:#999;">
@@ -351,6 +358,7 @@ try {
                                     <th>Item Requested</th>
                                     <th>Recipient</th>
                                     <th>Town</th>
+                                    <th>Qty</th>
                                     <th>Message</th>
                                     <th>Status</th>
                                     <th>Requested</th>
@@ -365,6 +373,7 @@ try {
                                     </td>
                                     <td><?php echo htmlspecialchars($r['recipient_name']); ?></td>
                                     <td><?php echo htmlspecialchars($r['recipient_town']); ?></td>
+                                    <td><strong><?php echo (int)($r['requested_quantity'] ?? 1); ?></strong></td>
                                     <td style="max-width:180px; font-size:12px; color:#777;">
                                         <?php echo $r['message'] ? htmlspecialchars(mb_strimwidth($r['message'], 0, 80, '…')) : '<em style="color:#ccc;">No message</em>'; ?>
                                     </td>

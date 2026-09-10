@@ -134,7 +134,7 @@ include_once "../includes/header.php";
         <!-- Header Banner -->
         <div class="db-header-banner request-aid-header-banner">
             <div class="db-header-text">
-                <h2>🤝 Request Support</h2>
+                <h2> Request Support</h2>
                 <p>Let community donors know what items or essential support you need assistance with.</p>
             </div>
             <a href="recipient_dashboard.php" class="btn-primary-db recipient-header-badge-btn">

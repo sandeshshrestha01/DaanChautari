@@ -13,58 +13,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_request'])) {
     $newstatus = in_array($_POST['new_status'] ?? '', ['approved','rejected','pending'])
                  ? $_POST['new_status'] : 'pending';
     try {
-        $donation_id   = null;
-        $total_don_qty = 0;
+        // Fetch donation and request info
+        $chk_stmt = $pdo->prepare("
+            SELECT dr.donation_id, dr.quantity AS req_qty, d.quantity AS total_don_qty 
+            FROM donation_requests dr 
+            JOIN donations d ON dr.donation_id = d.donation_id 
+            WHERE dr.request_id = :r
+        ");
+        $chk_stmt->execute(['r' => $req_id]);
+        $qty_info = $chk_stmt->fetch();
 
-        if ($newstatus === 'approved') {
-            // Check donated item total quantity vs already approved requested quantity + current request quantity
-            $chk_stmt = $pdo->prepare("
-                SELECT dr.donation_id, dr.quantity AS req_qty, d.quantity AS total_don_qty 
-                FROM donation_requests dr 
-                JOIN donations d ON dr.donation_id = d.donation_id 
-                WHERE dr.request_id = :r
+        if ($qty_info && $newstatus === 'approved') {
+            $donation_id   = (int)$qty_info['donation_id'];
+            $total_don_qty = (int)$qty_info['total_don_qty'];
+            $req_qty       = (int)$qty_info['req_qty'];
+
+            // Calculate sum of already approved request quantities for this donation item
+            $approved_stmt = $pdo->prepare("
+                SELECT COALESCE(SUM(quantity), 0) FROM donation_requests 
+                WHERE donation_id = :d_id AND status = 'approved' AND request_id != :r
             ");
-            $chk_stmt->execute(['r' => $req_id]);
-            $qty_info = $chk_stmt->fetch();
+            $approved_stmt->execute(['d_id' => $donation_id, 'r' => $req_id]);
+            $already_approved_qty = (int)$approved_stmt->fetchColumn();
 
-            if ($qty_info) {
-                $donation_id   = (int)$qty_info['donation_id'];
-                $total_don_qty = (int)$qty_info['total_don_qty'];
-                $req_qty       = (int)$qty_info['req_qty'];
+            $remaining_qty = $total_don_qty - $already_approved_qty;
 
-                // Calculate sum of already approved request quantities for this donation item
-                $approved_stmt = $pdo->prepare("
-                    SELECT COALESCE(SUM(quantity), 0) FROM donation_requests 
-                    WHERE donation_id = :d_id AND status = 'approved' AND request_id != :r
-                ");
-                $approved_stmt->execute(['d_id' => $donation_id, 'r' => $req_id]);
-                $already_approved_qty = (int)$approved_stmt->fetchColumn();
-
-                $remaining_qty = $total_don_qty - $already_approved_qty;
-
-                if ($req_qty > $remaining_qty) {
-                    $_SESSION['sweetalert_error'] = "Cannot approve request! Requested quantity ($req_qty) exceeds available stock ($remaining_qty remaining out of $total_don_qty total). Ask donor to add more stock.";
-                    header("Location: dashboard.php");
-                    exit;
-                }
+            if ($req_qty > $remaining_qty) {
+                $_SESSION['sweetalert_error'] = "Cannot approve request! Requested quantity ($req_qty) exceeds available stock ($remaining_qty remaining out of $total_don_qty total). Ask donor to add more stock.";
+                header("Location: dashboard.php");
+                exit;
             }
         }
 
         $pdo->prepare("UPDATE donation_requests SET status = :s, reviewed_at = NOW(), reviewed_by = :a WHERE request_id = :r")
             ->execute(['s' => $newstatus, 'a' => $_SESSION['user_id'], 'r' => $req_id]);
 
-        if ($newstatus === 'approved' && $donation_id !== null) {
-            // Check if all donated quantity has been allocated
+        // Sync donation listing status according to total approved quantity
+        if ($qty_info) {
+            $d_id = (int)$qty_info['donation_id'];
+            $tot_qty = (int)$qty_info['total_don_qty'];
             $approved_stmt = $pdo->prepare("
                 SELECT COALESCE(SUM(quantity), 0) FROM donation_requests 
                 WHERE donation_id = :d_id AND status = 'approved'
             ");
-            $approved_stmt->execute(['d_id' => $donation_id]);
+            $approved_stmt->execute(['d_id' => $d_id]);
             $total_approved = (int)$approved_stmt->fetchColumn();
 
-            if ($total_approved >= $total_don_qty) {
-                $pdo->prepare("UPDATE donations SET status = 'approved' WHERE donation_id = :d_id")
-                    ->execute(['d_id' => $donation_id]);
+            if ($total_approved >= $tot_qty) {
+                $pdo->prepare("UPDATE donations SET status = 'not_available' WHERE donation_id = :d_id")
+                    ->execute(['d_id' => $d_id]);
+            } else {
+                $pdo->prepare("UPDATE donations SET status = 'available' WHERE donation_id = :d_id")
+                    ->execute(['d_id' => $d_id]);
             }
         }
         set_flash_message('success', "Request #REQ-$req_id updated to " . strtoupper($newstatus));
@@ -179,7 +179,7 @@ try {
         </div>
     </div>
     <div class="dstat-card dstat-orange">
-        <div class="dstat-icon">🔔</div>
+        <div class="dstat-icon"><i class="fa-regular fa-bell"></i></div>
         <div class="dstat-body">
             <div class="dstat-num"><?php echo number_format($pending_req); ?></div>
             <div class="dstat-label">Pending Requests</div>
@@ -213,7 +213,7 @@ try {
                 <div>
                     <h3 class="dpanel-title">Recent Donations</h3>
                 </div>
-                <a href="manage_donations.php" class="dview-all">View all →</a>
+                <a href="manage_donations.php?tab=donations" class="dview-all">View all →</a>
             </div>
 
             <!-- Line Chart -->
@@ -267,7 +267,7 @@ try {
                 <div>
                     <h3 class="dpanel-title">Donation Requests Awaiting Response</h3>
                 </div>
-                <a href="manage_donations.php" class="dview-all">View all →</a>
+                <a href="manage_donations.php?tab=requests" class="dview-all">View all →</a>
             </div>
 
             <!-- Pie Chart -->
@@ -353,12 +353,12 @@ try {
                 <h3 class="dpanel-title">Quick Actions</h3>
             </div>
             <div class="dquick-list">
-                <a href="manage_donations.php" class="dquick-item">
+                <a href="manage_donations.php?tab=donations&status=requested" class="dquick-item">
                     <span class="dq-icon dq-green">🎁</span>
                     <span>Review Pending Donations</span>
                     <span class="dq-arrow">›</span>
                 </a>
-                <a href="manage_donations.php" class="dquick-item">
+                <a href="manage_donations.php?tab=requests&status=pending" class="dquick-item">
                     <span class="dq-icon dq-blue">💬</span>
                     <span>Respond to Requests</span>
                     <span class="dq-arrow">›</span>
@@ -368,7 +368,7 @@ try {
                     <span>Approve New Volunteers</span>
                     <span class="dq-arrow">›</span>
                 </a>
-                <a href="manage_donations.php" class="dquick-item">
+                <a href="manage_donations.php?tab=donations" class="dquick-item">
                     <span class="dq-icon dq-orange">📋</span>
                     <span>Manage Donation Listings</span>
                     <span class="dq-arrow">›</span>

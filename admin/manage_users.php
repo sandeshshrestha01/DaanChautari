@@ -309,8 +309,13 @@ if ($is_volunteer_view) {
         $v_params['st'] = $status_filter;
     }
     if (!empty($search_query)) {
-        $v_sql .= " AND (full_name LIKE :sq OR email LIKE :sq OR phone LIKE :sq OR town LIKE :sq OR skills LIKE :sq)";
-        $v_params['sq'] = "%$search_query%";
+        $v_sql .= " AND (full_name LIKE :sq_name OR email LIKE :sq_email OR phone LIKE :sq_phone OR town LIKE :sq_town OR skills LIKE :sq_skills)";
+        $search_term = "%$search_query%";
+        $v_params['sq_name']   = $search_term;
+        $v_params['sq_email']  = $search_term;
+        $v_params['sq_phone']  = $search_term;
+        $v_params['sq_town']   = $search_term;
+        $v_params['sq_skills'] = $search_term;
     }
     $v_sql .= " ORDER BY submitted_at DESC";
     $vol_stmt = $pdo->prepare($v_sql);
@@ -337,8 +342,12 @@ if ($is_volunteer_view) {
         $u_params['st'] = $status_filter;
     }
     if (!empty($search_query)) {
-        $u_sql .= " AND (u.full_name LIKE :sq OR u.email LIKE :sq OR u.phone LIKE :sq OR u.town LIKE :sq)";
-        $u_params['sq'] = "%$search_query%";
+        $u_sql .= " AND (u.full_name LIKE :sq_name OR u.email LIKE :sq_email OR u.phone LIKE :sq_phone OR u.town LIKE :sq_town)";
+        $search_term = "%$search_query%";
+        $u_params['sq_name']  = $search_term;
+        $u_params['sq_email'] = $search_term;
+        $u_params['sq_phone'] = $search_term;
+        $u_params['sq_town']  = $search_term;
     }
     $u_sql .= " ORDER BY u.created_at DESC";
     $u_stmt = $pdo->prepare($u_sql);
@@ -379,7 +388,7 @@ require_once __DIR__ . '/admin_header.php';
 <!-- ═══════════════════════ STAT CARDS ═══════════════════════ -->
 <div class="dash-stats">
     <div class="dstat-card dstat-green">
-        <div class="dstat-icon">👥</div>
+        <div class="dstat-icon"><i class="fa-regular fa-user"></i></div>
         <div>
             <div class="dstat-num"><?php echo number_format($total_users); ?></div>
             <div class="dstat-label">Total Users</div>
@@ -403,7 +412,7 @@ require_once __DIR__ . '/admin_header.php';
     </div>
 
     <div class="dstat-card dstat-orange">
-        <div class="dstat-icon">🤝</div>
+        <div class="dstat-icon"><i class="fa-solid fa-hand-holding-heart"></i></div>
         <div>
             <div class="dstat-num"><?php echo number_format($total_volunteers); ?></div>
             <div class="dstat-label">
@@ -440,16 +449,16 @@ require_once __DIR__ . '/admin_header.php';
             <!-- Legend Tags -->
             <div class="chart-legend-tags">
                 <span class="chart-legend-tag">
-                    <span class="chart-legend-dot" style="background:#2e7d32;"></span> Total Signups
+                    <span class="chart-legend-dot" style="background:#10b981;"></span> Total Signups
                 </span>
                 <span class="chart-legend-tag">
-                    <span class="chart-legend-dot" style="background:#0288d1;"></span> Donors
+                    <span class="chart-legend-dot" style="background:#3b82f6;"></span> Donors
                 </span>
                 <span class="chart-legend-tag">
-                    <span class="chart-legend-dot" style="background:#7b1fa2;"></span> Recipients
+                    <span class="chart-legend-dot" style="background:#8b5cf6;"></span> Recipients
                 </span>
                 <span class="chart-legend-tag">
-                    <span class="chart-legend-dot" style="background:#00796b;"></span> Volunteers
+                    <span class="chart-legend-dot" style="background:#f59e0b;"></span> Volunteers
                 </span>
             </div>
 
@@ -575,7 +584,7 @@ require_once __DIR__ . '/admin_header.php';
                     <tr>
                         <th>Volunteer</th>
                         <th>Contact</th>
-                        <th>Town / Location</th>
+                        <th>Address</th>
                         <th>Offered Skills</th>
                         <th>Availability</th>
                         <th>Status</th>
@@ -612,7 +621,7 @@ require_once __DIR__ . '/admin_header.php';
                                 <div class="u-ava" style="background:#00796b;"><?php echo $v_init; ?></div>
                                 <div>
                                     <div class="u-name"><?php echo htmlspecialchars($vol['full_name']); ?></div>
-                                    <div class="badge-id">#VOL-<?php echo $vol['volunteer_id']; ?></div>
+                                    <div class="badge-id">VOL-<?php echo $vol['volunteer_id']; ?></div>
                                 </div>
                             </div>
                         </td>
@@ -707,7 +716,7 @@ require_once __DIR__ . '/admin_header.php';
                         <th>User</th>
                         <th>Email & Phone</th>
                         <th>Role</th>
-                        <th>Town</th>
+                        <th>Address</th>
                         <th>Activity</th>
                         <th>Joined Date</th>
                         <th>Status</th>
@@ -719,7 +728,7 @@ require_once __DIR__ . '/admin_header.php';
                     <tr>
                         <td colspan="8" class="td-empty">
                             <div class="empty-state">
-                                <div class="ei">👥</div>
+                                <div class="ei"><i class="fa-solid fa-users"></i></div>
                                 <h3>No users found</h3>
                                 <p>Try adjusting your search keywords or role filters.</p>
                             </div>
@@ -1102,64 +1111,53 @@ document.addEventListener('DOMContentLoaded', function() {
         primaryGradient.addColorStop(1, 'rgba(46, 125, 50, 0.00)');
 
         new Chart(lineCtx, {
-            type: 'line',
+            type: 'bar',
             data: {
                 labels: labels,
                 datasets: [
                     {
                         label: 'Total User Signups',
                         data: totalData,
-                        borderColor: '#2e7d32',
-                        backgroundColor: primaryGradient,
-                        fill: true,
-                        tension: 0.42,
-                        pointBackgroundColor: '#2e7d32',
-                        pointBorderColor: '#ffffff',
-                        pointBorderWidth: 2,
-                        pointRadius: 4.5,
-                        pointHoverRadius: 7,
-                        borderWidth: 3,
-                        order: 1
+                        backgroundColor: 'rgba(16, 185, 129, 0.75)',
+                        hoverBackgroundColor: 'rgba(16, 185, 129, 0.95)',
+                        borderColor: '#10b981',
+                        borderWidth: 1.5,
+                        borderRadius: 6,
+                        borderSkipped: false,
+                        order: 0
                     },
                     {
                         label: 'Donors',
                         data: donorData,
-                        borderColor: '#0288d1',
-                        backgroundColor: 'transparent',
-                        fill: false,
-                        tension: 0.4,
-                        pointBackgroundColor: '#0288d1',
-                        pointRadius: 3.5,
-                        pointHoverRadius: 6,
-                        borderWidth: 2,
-                        order: 2
+                        backgroundColor: 'rgba(59, 130, 246, 0.70)',
+                        hoverBackgroundColor: 'rgba(59, 130, 246, 0.95)',
+                        borderColor: '#3b82f6',
+                        borderWidth: 1.5,
+                        borderRadius: 6,
+                        borderSkipped: false,
+                        order: 1
                     },
                     {
                         label: 'Recipients',
                         data: recipData,
-                        borderColor: '#7b1fa2',
-                        backgroundColor: 'transparent',
-                        fill: false,
-                        tension: 0.4,
-                        pointBackgroundColor: '#7b1fa2',
-                        pointRadius: 3.5,
-                        pointHoverRadius: 6,
-                        borderWidth: 2,
-                        order: 3
+                        backgroundColor: 'rgba(139, 92, 246, 0.70)',
+                        hoverBackgroundColor: 'rgba(139, 92, 246, 0.95)',
+                        borderColor: '#8b5cf6',
+                        borderWidth: 1.5,
+                        borderRadius: 6,
+                        borderSkipped: false,
+                        order: 2
                     },
                     {
                         label: 'Volunteer Applications',
                         data: volData,
-                        borderColor: '#00796b',
-                        backgroundColor: 'transparent',
-                        borderDash: [5, 4],
-                        fill: false,
-                        tension: 0.4,
-                        pointBackgroundColor: '#00796b',
-                        pointRadius: 3.5,
-                        pointHoverRadius: 6,
-                        borderWidth: 2,
-                        order: 4
+                        backgroundColor: 'rgba(245, 158, 11, 0.70)',
+                        hoverBackgroundColor: 'rgba(245, 158, 11, 0.95)',
+                        borderColor: '#f59e0b',
+                        borderWidth: 1.5,
+                        borderRadius: 6,
+                        borderSkipped: false,
+                        order: 3
                     }
                 ]
             },

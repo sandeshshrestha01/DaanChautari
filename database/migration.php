@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS donations (
     description    TEXT          DEFAULT NULL,
     town           VARCHAR(100)  NOT NULL COMMENT 'Location of donation item',
     img_url        VARCHAR(255)  DEFAULT NULL COMMENT 'Image file path',
-    status         ENUM('available','requested','approved','rejected') NOT NULL DEFAULT 'available',
+    status         ENUM('available','not_available') NOT NULL DEFAULT 'available',
     donated_at     TIMESTAMP     DEFAULT CURRENT_TIMESTAMP COMMENT 'Auto-recorded when donor submits',
     updated_at     TIMESTAMP     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 

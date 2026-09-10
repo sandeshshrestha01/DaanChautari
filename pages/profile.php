@@ -90,6 +90,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $allowed  = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
                     $max_size = 3 * 1024 * 1024; // 3 MB
                     $upload_dir = __DIR__ . '/../assets/images/profiles/';
+                    if (!is_dir($upload_dir)) {
+                        @mkdir($upload_dir, 0755, true);
+                    }
 
                     if (!in_array($file['type'], $allowed)) {
                         set_flash_message('error', 'Invalid photo format. Only JPG, PNG, WEBP, and GIF are allowed.');

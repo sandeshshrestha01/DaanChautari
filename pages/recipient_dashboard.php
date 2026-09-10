@@ -63,50 +63,72 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
     if ($donation_id > 0) {
         try {
-            // Check available donation quantity
-            $stmt_d = $pdo->prepare("SELECT quantity FROM donations WHERE donation_id = :d_id");
+            // Check donation details and calculate remaining quantity after approved requests
+            $stmt_d = $pdo->prepare("
+                SELECT d.donation_id, d.donor_id, d.title, d.quantity, d.status,
+                       COALESCE((
+                           SELECT SUM(dr.quantity) 
+                           FROM donation_requests dr 
+                           WHERE dr.donation_id = d.donation_id AND dr.status = 'approved'
+                       ), 0) AS approved_qty
+                FROM donations d 
+                WHERE d.donation_id = :d_id
+            ");
             $stmt_d->execute(['d_id' => $donation_id]);
             $don_item = $stmt_d->fetch();
-            $available_qty = $don_item ? (int)$don_item['quantity'] : 1;
 
-            if ($quantity > $available_qty) {
-                set_flash_message('error', "Requested quantity ($quantity) cannot exceed available quantity ($available_qty).");
+            if (!$don_item) {
+                set_flash_message('error', 'Donation item not found.');
+            } elseif ((int)$don_item['donor_id'] === (int)$user_id) {
+                // Donors cannot request their own donation items
+                set_flash_message('error', 'You cannot request your own donation item. Only other recipients can request it.');
             } else {
-                // Check if already requested
-                $check = $pdo->prepare("SELECT request_id FROM donation_requests WHERE donation_id = :d_id AND recipient_id = :r_id");
-                $check->execute(['d_id' => $donation_id, 'r_id' => $recipient_id]);
-                if ($check->fetch()) {
-                    set_flash_message('warning', 'You have already requested this item.');
+                $remaining_qty = (int)$don_item['quantity'] - (int)$don_item['approved_qty'];
+
+                if ($remaining_qty <= 0 || $don_item['status'] !== 'available') {
+                    set_flash_message('error', 'This item is no longer available as all stock has been donated.');
+                } elseif ($quantity > $remaining_qty) {
+                    set_flash_message('error', "Requested quantity ($quantity) cannot exceed available quantity ($remaining_qty).");
                 } else {
-                    // Update recipient details (reason, town, address) in `recipients` table
-                    if ($recipient_info && isset($recipient_info['recipient_id'])) {
-                        $upd_rec = $pdo->prepare("
-                            UPDATE recipients 
-                            SET reason = :reason, town = :town, address = :address, updated_at = NOW() 
-                            WHERE recipient_id = :r_id
-                        ");
-                        $upd_rec->execute([
-                            'reason'  => $reason,
-                            'town'    => !empty($town) ? $town : ($recipient_info['town'] ?? 'Kathmandu'),
-                            'address' => $address,
-                            'r_id'    => $recipient_id
-                        ]);
-                    }
-
-                    // If user provided a reason, prepend it into the request message if message is empty
-                    $request_message = !empty($message) ? $message : ($reason ? "Reason: " . $reason : '');
-
-                    $stmt = $pdo->prepare("
-                        INSERT INTO donation_requests (donation_id, recipient_id, message, quantity, status, requested_at)
-                        VALUES (:d_id, :r_id, :msg, :qty, 'pending', NOW())
+                    // Check if already requested
+                    $check = $pdo->prepare("
+                        SELECT request_id FROM donation_requests 
+                        WHERE donation_id = :d_id AND (recipient_id = :r_id OR recipient_id = :u_id)
                     ");
-                    $stmt->execute([
-                        'd_id' => $donation_id,
-                        'r_id' => $recipient_id,
-                        'msg'  => $request_message,
-                        'qty'  => $quantity
-                    ]);
-                    set_flash_message('success', 'Your request has been submitted successfully!');
+                    $check->execute(['d_id' => $donation_id, 'r_id' => $recipient_id, 'u_id' => $user_id]);
+                    if ($check->fetch()) {
+                        set_flash_message('warning', 'You have already requested this item.');
+                    } else {
+                        // Update recipient details (reason, town, address) in `recipients` table
+                        if ($recipient_info && isset($recipient_info['recipient_id'])) {
+                            $upd_rec = $pdo->prepare("
+                                UPDATE recipients 
+                                SET reason = :reason, town = :town, address = :address, updated_at = NOW() 
+                                WHERE recipient_id = :r_id
+                            ");
+                            $upd_rec->execute([
+                                'reason'  => $reason,
+                                'town'    => !empty($town) ? $town : ($recipient_info['town'] ?? 'Kathmandu'),
+                                'address' => $address,
+                                'r_id'    => $recipient_id
+                            ]);
+                        }
+
+                        // If user provided a reason, prepend it into the request message if message is empty
+                        $request_message = !empty($message) ? $message : ($reason ? "Reason: " . $reason : '');
+
+                        $stmt = $pdo->prepare("
+                            INSERT INTO donation_requests (donation_id, recipient_id, message, quantity, status, requested_at)
+                            VALUES (:d_id, :r_id, :msg, :qty, 'pending', NOW())
+                        ");
+                        $stmt->execute([
+                            'd_id' => $donation_id,
+                            'r_id' => $recipient_id,
+                            'msg'  => $request_message,
+                            'qty'  => $quantity
+                        ]);
+                        set_flash_message('success', 'Your request has been submitted successfully!');
+                    }
                 }
             }
         } catch (PDOException $e) {
@@ -158,20 +180,20 @@ try {
 
 // Fetch Stats according to donation_requests table schema
 try {
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM donation_requests WHERE recipient_id = :id AND status = 'approved'");
-    $stmt->execute(['id' => $recipient_id]);
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM donation_requests WHERE (recipient_id = :id OR recipient_id = :u_id) AND status = 'approved'");
+    $stmt->execute(['id' => $recipient_id, 'u_id' => $user_id]);
     $approved_requests = $stmt->fetchColumn();
 
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM donation_requests WHERE recipient_id = :id AND status = 'pending'");
-    $stmt->execute(['id' => $recipient_id]);
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM donation_requests WHERE (recipient_id = :id OR recipient_id = :u_id) AND status = 'pending'");
+    $stmt->execute(['id' => $recipient_id, 'u_id' => $user_id]);
     $pending_requests = $stmt->fetchColumn();
 
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM donation_requests WHERE recipient_id = :id AND status = 'rejected'");
-    $stmt->execute(['id' => $recipient_id]);
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM donation_requests WHERE (recipient_id = :id OR recipient_id = :u_id) AND status = 'rejected'");
+    $stmt->execute(['id' => $recipient_id, 'u_id' => $user_id]);
     $rejected_requests = $stmt->fetchColumn();
 
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM donation_requests WHERE recipient_id = :id");
-    $stmt->execute(['id' => $recipient_id]);
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM donation_requests WHERE (recipient_id = :id OR recipient_id = :u_id)");
+    $stmt->execute(['id' => $recipient_id, 'u_id' => $user_id]);
     $total_requests = $stmt->fetchColumn();
 } catch (PDOException $e) {
     $approved_requests = $pending_requests = $rejected_requests = $total_requests = 0;
@@ -182,12 +204,29 @@ $filter_category = trim($_GET['category'] ?? '');
 $filter_town     = trim($_GET['town'] ?? '');
 
 // Fetch Available Donations to Request with filtering
+// Deducts approved quantities and hides items with no remaining stock (remaining_qty <= 0)
 try {
     $sql = "
-        SELECT d.*, u.full_name AS donor_name
+        SELECT d.*, 
+               u.full_name AS donor_name,
+               COALESCE((
+                   SELECT SUM(dr.quantity) 
+                   FROM donation_requests dr 
+                   WHERE dr.donation_id = d.donation_id AND dr.status = 'approved'
+               ), 0) AS approved_qty,
+               (d.quantity - COALESCE((
+                   SELECT SUM(dr.quantity) 
+                   FROM donation_requests dr 
+                   WHERE dr.donation_id = d.donation_id AND dr.status = 'approved'
+               ), 0)) AS remaining_qty
         FROM donations d
         JOIN users u ON d.donor_id = u.user_id
         WHERE d.status = 'available'
+          AND (d.quantity - COALESCE((
+                   SELECT SUM(dr.quantity) 
+                   FROM donation_requests dr 
+                   WHERE dr.donation_id = d.donation_id AND dr.status = 'approved'
+               ), 0)) > 0
     ";
     $params = [];
 
@@ -208,6 +247,21 @@ try {
     $available_items = [];
 }
 
+// Track IDs of donations already requested by this recipient (pending or approved)
+$already_requested_ids = [];
+try {
+    $stmt_req_ids = $pdo->prepare("
+        SELECT donation_id 
+        FROM donation_requests 
+        WHERE (recipient_id = :r_id OR recipient_id = :u_id) 
+          AND status IN ('pending', 'approved')
+    ");
+    $stmt_req_ids->execute(['r_id' => $recipient_id, 'u_id' => $user_id]);
+    $already_requested_ids = $stmt_req_ids->fetchAll(PDO::FETCH_COLUMN);
+} catch (PDOException $e) {
+    $already_requested_ids = [];
+}
+
 // Fetch My Requests joined with donations, users (donor), and admin (reviewer)
 try {
     $stmt = $pdo->prepare("
@@ -225,11 +279,11 @@ try {
         JOIN donations d ON dr.donation_id = d.donation_id
         JOIN users u_donor ON d.donor_id = u_donor.user_id
         LEFT JOIN users u_admin ON dr.reviewed_by = u_admin.user_id
-        WHERE dr.recipient_id = :id
+        WHERE (dr.recipient_id = :rec_id OR dr.recipient_id = :u_id)
         ORDER BY dr.requested_at DESC
         LIMIT 20
     ");
-    $stmt->execute(['id' => $recipient_id]);
+    $stmt->execute(['rec_id' => $recipient_id, 'u_id' => $user_id]);
     $my_requests = $stmt->fetchAll();
 } catch (PDOException $e) {
     $my_requests = [];
@@ -256,7 +310,10 @@ function badge_class(string $status): string {
         </div>
         <div class="recipient-header-actions">
             <span class="db-header-badge">RECIPIENT ACCOUNT</span>
-            <a href="<?php echo BASE_URL; ?>pages/browse_donations.php" class="btn-primary-db recipient-header-badge-btn">🔍 Browse Donations</a>
+            <a href="<?php echo BASE_URL; ?>pages/browse_donations.php" class="btn-primary-db recipient-header-badge-btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg> Browse Donations</a>
         </div>
     </div>
 
@@ -297,7 +354,11 @@ function badge_class(string $status): string {
                 </div>
             <?php else: ?>
                 <div class="recipient-items-grid">
-                    <?php foreach ($available_items as $item): ?>
+                    <?php foreach ($available_items as $item): 
+                        $rem_qty = (int)($item['remaining_qty'] ?? $item['quantity'] ?? 1);
+                        $is_donor = ((int)$item['donor_id'] === (int)$user_id);
+                        $is_already_requested = in_array((int)$item['donation_id'], array_map('intval', $already_requested_ids));
+                    ?>
                         <div class="recipient-item-card">
                             <!-- Item Image Preview Container -->
                             <div class="recipient-item-img-wrap">
@@ -317,16 +378,26 @@ function badge_class(string $status): string {
                                         <?php echo htmlspecialchars($item['title']); ?>
                                     </h4>
                                     <div class="recipient-item-info">
-                                        📦 Qty <?php echo (int)($item['quantity'] ?? 1); ?> · <?php echo htmlspecialchars($item['category']); ?>
+                                        📦 Qty <?php echo $rem_qty; ?> · <?php echo htmlspecialchars($item['category']); ?>
                                     </div>
                                     <div class="recipient-item-info">
                                         📍 <?php echo htmlspecialchars($item['town']); ?>
                                     </div>
                                 </div>
 
-                                <button type="button" class="btn-primary-db recipient-item-btn" onclick="openRequestModal(<?php echo $item['donation_id']; ?>, '<?php echo htmlspecialchars(addslashes($item['title'])); ?>', '<?php echo htmlspecialchars(addslashes($item['category'])); ?>', <?php echo (int)($item['quantity'] ?? 1); ?>)">
-                                    Request
-                                </button>
+                                <?php if ($is_donor): ?>
+                                    <button type="button" class="btn-primary-db recipient-item-btn" style="background: #78909c; cursor: not-allowed; opacity: 0.9;" disabled title="You donated this item. Only other recipients can request it.">
+                                        Your Donation
+                                    </button>
+                                <?php elseif ($is_already_requested): ?>
+                                    <button type="button" class="btn-primary-db recipient-item-btn" style="background: #9e9e9e; cursor: not-allowed; opacity: 0.85;" disabled title="You have already requested this item">
+                                        ✓ Requested
+                                    </button>
+                                <?php else: ?>
+                                    <button type="button" class="btn-primary-db recipient-item-btn" onclick="openRequestModal(<?php echo (int)$item['donation_id']; ?>, '<?php echo htmlspecialchars(addslashes($item['title'])); ?>', '<?php echo htmlspecialchars(addslashes($item['category'])); ?>', <?php echo $rem_qty; ?>)">
+                                        Request
+                                    </button>
+                                <?php endif; ?>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -339,7 +410,10 @@ function badge_class(string $status): string {
             <!-- Filter Form -->
             <div class="recipient-filter-panel">
                 <div class="recipient-filter-title">
-                    🔍 Find What You Need
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg> Find What You Need
                 </div>
                 <form method="GET" action="browse_donations.php">
                     <div class="form-group recipient-form-group-cat">
@@ -369,7 +443,7 @@ function badge_class(string $status): string {
             </div>
 
             <!-- Recipient Profile Info snippet if stored in database -->
-            <?php if (!empty($recipient_info)): ?>
+            <!-- <?php if (!empty($recipient_info)): ?>
             <div class="recipient-tips-panel" style="margin-bottom: 15px;">
                 <div class="recipient-tips-title">
                     📋 Recipient Info
@@ -384,17 +458,17 @@ function badge_class(string $status): string {
                     <?php endif; ?>
                 </p>
             </div>
-            <?php endif; ?>
+            <?php endif; ?> -->
 
             <!-- Recipient Tips -->
-            <div class="recipient-tips-panel">
+            <!-- <div class="recipient-tips-panel">
                 <div class="recipient-tips-title">
                     💡 Recipient Tips
                 </div>
                 <p class="recipient-tips-desc">
                     Request only what you need so more donations can reach others in your community faster.
                 </p>
-            </div>
+            </div> -->
         </div>
 
     </div>

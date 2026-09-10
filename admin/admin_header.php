@@ -21,6 +21,14 @@ $page_title    = $page_title ?? 'Dashboard';
 
 $flash = get_flash_message();
 
+// Count pending requests for sidebar badge
+$pending_req_nav_count = 0;
+try {
+    $pending_req_nav_count = (int)$pdo->query("SELECT COUNT(*) FROM donation_requests WHERE status = 'pending'")->fetchColumn();
+} catch (PDOException $e) {
+    $pending_req_nav_count = 0;
+}
+
 // Helper: category emoji
 if (!function_exists('cat_emoji')) {
     function cat_emoji(string $cat): string {
@@ -51,14 +59,15 @@ if (!function_exists('cat_badge')) {
 if (!function_exists('status_badge')) {
     function status_badge(string $status): string {
         return match($status) {
-            'available' => 'b-available',
-            'requested' => 'b-requested',
-            'approved'  => 'b-approved',
-            'rejected'  => 'b-rejected',
-            'pending'   => 'b-pending',
-            'active'    => 'b-active',
-            'inactive'  => 'b-inactive',
-            default     => 'b-inactive',
+            'available'     => 'b-available',
+            'not_available' => 'b-rejected',   // reuse red badge for Not Available
+            'requested'     => 'b-requested',
+            'approved'      => 'b-approved',
+            'rejected'      => 'b-rejected',
+            'pending'       => 'b-pending',
+            'active'        => 'b-active',
+            'inactive'      => 'b-inactive',
+            default         => 'b-inactive',
         };
     }
 }
@@ -94,7 +103,10 @@ if (!function_exists('item_photo_src')) {
 <aside class="admin-sidebar" id="adminSidebar">
 
     <div class="sidebar-brand">
-        <div class="brand-name">🤝 Daan Chautari</div>
+        <div class="brand-name">
+            <img src="<?php echo BASE_URL; ?>assets/images/logo.png" alt="Logo" class="brand-logo" onerror="this.src='<?php echo BASE_URL; ?>logoDan.png'">
+            <span>Daan Chautari</span>
+        </div>
         <div class="brand-tag">ADMIN CONTROL PANEL</div>
     </div>
 
@@ -115,31 +127,26 @@ if (!function_exists('item_photo_src')) {
         <div class="sidebar-sep">Donations</div>
 
         <a href="<?php echo BASE_URL; ?>admin/manage_donations.php"
-           class="<?php echo $current_page === 'manage_donations.php' ? 'active' : ''; ?>">
+           class="<?php echo ($current_page === 'manage_donations.php' && ($_GET['tab'] ?? '') !== 'requests' && ($_GET['filter'] ?? '') !== 'pending') ? 'active' : ''; ?>">
             <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
                 <line x1="3" y1="6" x2="21" y2="6"/>
                 <path d="M16 10a4 4 0 01-8 0"/>
             </svg>
-            View Donations
+            Manage Donations
         </a>
 
-        <a href="<?php echo BASE_URL; ?>admin/manage_donations.php?filter=pending"
-           class="<?php echo ($current_page === 'manage_donations.php' && ($_GET['filter'] ?? '') === 'pending') ? 'active' : ''; ?>">
+        <a href="<?php echo BASE_URL; ?>admin/manage_donations.php?tab=requests"
+           class="<?php echo ($current_page === 'manage_donations.php' && (($_GET['tab'] ?? '') === 'requests' || ($_GET['filter'] ?? '') === 'pending')) ? 'active' : ''; ?>">
             <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
             </svg>
             Respond to Donations
+            <?php if ($pending_req_nav_count > 0): ?>
+                <span class="nav-pill"><?php echo $pending_req_nav_count; ?></span>
+            <?php endif; ?>
         </a>
 
-        <a href="<?php echo BASE_URL; ?>admin/manage_donations.php"
-           class="<?php echo $current_page === 'manage_donations.php' ? 'active' : ''; ?>">
-            <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="3"/>
-                <path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/>
-            </svg>
-            Manage Donations
-        </a>
 
         <div class="sidebar-sep">People</div>
 
@@ -154,13 +161,13 @@ if (!function_exists('item_photo_src')) {
             Manage Users
         </a>
 
-        <a href="<?php echo BASE_URL; ?>admin/manage_users.php?role=volunteer"
+        <!-- <a href="<?php echo BASE_URL; ?>admin/manage_users.php?role=volunteer"
            class="<?php echo ($current_page === 'manage_users.php' && ($_GET['role'] ?? '') === 'volunteer') ? 'active' : ''; ?>">
             <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
             </svg>
             Volunteers
-        </a>
+        </a> -->
 
         <div class="sidebar-sep">Site</div>
 

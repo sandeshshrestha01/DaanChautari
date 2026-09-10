@@ -75,9 +75,7 @@ CREATE TABLE donations (
     img_url        VARCHAR(255)  DEFAULT NULL COMMENT 'Image file path',
     status         ENUM(
                        'available',
-                       'requested',
-                       'approved',
-                       'rejected'
+                       'not_available'
                    )             NOT NULL DEFAULT 'available',
     donated_at     TIMESTAMP     DEFAULT CURRENT_TIMESTAMP
                                  COMMENT 'Auto-recorded when donor submits',
@@ -266,13 +264,14 @@ VALUES (
 -- JOIN users u ON d.donor_id = u.user_id
 -- WHERE d.status = 'available'
 -- ORDER BY d.donated_at DESC
+-- Note: donation status is either 'available' or 'not_available'
 -- LIMIT 8;
 
 -- Search donations by town and category:
 -- SELECT d.*, u.full_name AS donor_name
 -- FROM donations d
 -- JOIN users u ON d.donor_id = u.user_id
--- WHERE d.status = 'available'
+-- WHERE d.status = 'available'  -- or 'not_available'
 -- AND d.town LIKE '%kathmandu%'
 -- AND d.category = 'Food'
 -- ORDER BY d.donated_at DESC;
