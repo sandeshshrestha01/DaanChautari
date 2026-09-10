@@ -83,7 +83,7 @@ try {
     $total_donations = (int)$pdo->query("SELECT COUNT(*) FROM donations")->fetchColumn();
     $pending_req     = (int)$pdo->query("SELECT COUNT(*) FROM donation_requests WHERE status = 'pending'")->fetchColumn();
     $total_users     = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE role IN ('donor', 'recipient')")->fetchColumn();
-    $active_vols     = (int)$pdo->query("SELECT COUNT(*) FROM volunteers WHERE status = 'active'")->fetchColumn();
+    $active_vols     = (int)$pdo->query("SELECT COUNT(*) FROM volunteers")->fetchColumn();
 
     // Recent donations (last 5)
     $recent_donations = $pdo->query("
