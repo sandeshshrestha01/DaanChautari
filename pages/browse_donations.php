@@ -121,8 +121,51 @@ try {
     $towns = [];
 }
 
+// Pagination Setup
+$items_per_page = 8;
+$current_page = max(1, (int)($_GET['page'] ?? 1));
+$offset = ($current_page - 1) * $items_per_page;
+
 // Fetch Available Donations with Filters (deducts approved quantity, hides 0 remaining stock)
 try {
+    // Build WHERE clause shared by count and data queries
+    $where_sql = "
+        WHERE d.status = 'available'
+          AND (d.quantity - COALESCE((
+                   SELECT SUM(dr.quantity) 
+                   FROM donation_requests dr 
+                   WHERE dr.donation_id = d.donation_id AND dr.status = 'approved'
+               ), 0)) > 0
+    ";
+    $params = [];
+
+    if (!empty($filter_category)) {
+        $where_sql .= " AND d.category = :category";
+        $params['category'] = $filter_category;
+    }
+    if (!empty($filter_town)) {
+        $where_sql .= " AND d.town LIKE :town";
+        $params['town'] = '%' . $filter_town . '%';
+    }
+    if (!empty($search_query)) {
+        $where_sql .= " AND (d.title LIKE :search OR d.description LIKE :search)";
+        $params['search'] = '%' . $search_query . '%';
+    }
+
+    // Count total matching items
+    $count_sql = "SELECT COUNT(*) FROM donations d $where_sql";
+    $count_stmt = $pdo->prepare($count_sql);
+    $count_stmt->execute($params);
+    $total_items = (int)$count_stmt->fetchColumn();
+    $total_pages = max(1, ceil($total_items / $items_per_page));
+
+    // Clamp current page
+    if ($current_page > $total_pages) {
+        $current_page = $total_pages;
+        $offset = ($current_page - 1) * $items_per_page;
+    }
+
+    // Fetch paginated donations
     $sql = "
         SELECT d.*, u.full_name AS donor_name,
                COALESCE((
@@ -137,34 +180,17 @@ try {
                ), 0)) AS remaining_qty
         FROM donations d
         JOIN users u ON d.donor_id = u.user_id
-        WHERE d.status = 'available'
-          AND (d.quantity - COALESCE((
-                   SELECT SUM(dr.quantity) 
-                   FROM donation_requests dr 
-                   WHERE dr.donation_id = d.donation_id AND dr.status = 'approved'
-               ), 0)) > 0
+        $where_sql
+        ORDER BY d.donated_at DESC
+        LIMIT $items_per_page OFFSET $offset
     ";
-    $params = [];
-
-    if (!empty($filter_category)) {
-        $sql .= " AND d.category = :category";
-        $params['category'] = $filter_category;
-    }
-    if (!empty($filter_town)) {
-        $sql .= " AND d.town LIKE :town";
-        $params['town'] = '%' . $filter_town . '%';
-    }
-    if (!empty($search_query)) {
-        $sql .= " AND (d.title LIKE :search OR d.description LIKE :search)";
-        $params['search'] = '%' . $search_query . '%';
-    }
-
-    $sql .= " ORDER BY d.donated_at DESC";
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
     $all_donations = $stmt->fetchAll();
 } catch (PDOException $e) {
     $all_donations = [];
+    $total_items = 0;
+    $total_pages = 1;
 }
 
 // Track IDs user has already requested
@@ -221,7 +247,7 @@ if ($user_role === 'recipient') {
                         All Available Donations
                     <?php endif; ?>
                 </h3>
-                <span class="recipient-count-subtitle"><?php echo count($all_donations); ?> items found</span>
+                <span class="recipient-count-subtitle"><?php echo $total_items; ?> items found</span>
             </div>
 
             <?php if (empty($all_donations)): ?>
@@ -231,68 +257,137 @@ if ($user_role === 'recipient') {
                     <a href="browse_donations.php" style="display:inline-block; margin-top:12px; font-size:13px; color:var(--accent-green); font-weight:600;">View All Donations</a>
                 </div>
             <?php else: ?>
+                <?php
+                    // Build base URL for pagination links (preserving filters)
+                    $pagination_params = [];
+                    if (!empty($filter_category)) $pagination_params['category'] = $filter_category;
+                    if (!empty($filter_town))     $pagination_params['town'] = $filter_town;
+                    if (!empty($search_query))    $pagination_params['search'] = $search_query;
+
+                    $range_start = $offset + 1;
+                    $range_end   = min($offset + $items_per_page, $total_items);
+                ?>
+
+                <!-- Horizontal Flex Wrap Donation Cards Grid -->
+                <div class="browse-cards-grid" id="browseDonationsList">
                     <?php foreach ($all_donations as $item): 
                         $rem_qty = (int)($item['remaining_qty'] ?? $item['quantity'] ?? 1);
                         $is_donor = ((int)$item['donor_id'] === (int)$user_id);
                         $is_requested = in_array((int)$item['donation_id'], array_map('intval', $requested_ids));
                         $item_img = !empty($item['img_url']) ? $item['img_url'] : ($item['photo'] ?? '');
                     ?>
-                        <div class="recipient-item-card">
-                            <!-- Image Container -->
-                            <div class="recipient-item-img-wrap">
+                        <div class="browse-donation-card">
+                            <!-- Image Section with Badges -->
+                            <div class="browse-card-img-wrap">
                                 <?php if (!empty($item_img)): ?>
-                                    <img src="<?php echo BASE_URL . htmlspecialchars($item_img); ?>" alt="<?php echo htmlspecialchars($item['title']); ?>">
+                                    <img src="<?php echo BASE_URL . htmlspecialchars($item_img); ?>" alt="<?php echo htmlspecialchars($item['title']); ?>" class="browse-card-img" loading="lazy">
                                 <?php else: ?>
-                                    <div class="recipient-item-placeholder">
-                                        <?php echo cat_emoji($item['category']); ?>
+                                    <div class="browse-card-placeholder">
+                                        <span class="browse-placeholder-emoji"><?php echo cat_emoji($item['category']); ?></span>
+                                        <span class="browse-placeholder-text"><?php echo htmlspecialchars($item['category']); ?></span>
                                     </div>
                                 <?php endif; ?>
+
+                                <div class="browse-card-badge-top-left">
+                                    <span class="browse-category-pill">
+                                        <?php echo cat_emoji($item['category']) . ' ' . htmlspecialchars($item['category']); ?>
+                                    </span>
+                                </div>
+
+                                <div class="browse-card-badge-top-right">
+                                    <span class="browse-qty-pill">
+                                        <i class="fa-solid fa-boxes-stacked"></i> <?php echo $rem_qty; ?> Available
+                                    </span>
+                                </div>
                             </div>
 
-                            <!-- Body Details -->
-                            <div class="recipient-item-body">
-                                <div>
-                                    <h4 class="recipient-item-title">
+                            <!-- Card Body -->
+                            <div class="browse-card-body">
+                                <div class="browse-card-main-info">
+                                    <h4 class="browse-card-title">
                                         <?php echo htmlspecialchars($item['title']); ?>
                                     </h4>
-                                    <div class="recipient-item-info">
-                                        📦 Qty <?php echo $rem_qty; ?> · <?php echo htmlspecialchars($item['category']); ?>
+
+                                    <div class="browse-card-meta-row">
+                                        <span class="browse-meta-chip">
+                                            <i class="fa-solid fa-location-dot"></i> <?php echo htmlspecialchars($item['town']); ?>
+                                        </span>
+                                        <span class="browse-meta-chip">
+                                            <i class="fa-solid fa-user"></i> <?php echo htmlspecialchars($item['donor_name'] ?? 'Community Donor'); ?>
+                                        </span>
+                                        <?php if (!empty($item['donated_at'])): ?>
+                                            <span class="browse-meta-chip">
+                                                <i class="fa-regular fa-clock"></i> <?php echo date('M j, Y', strtotime($item['donated_at'])); ?>
+                                            </span>
+                                        <?php endif; ?>
                                     </div>
-                                    <div class="recipient-item-info" style="margin-bottom: 8px;">
-                                        📍 <?php echo htmlspecialchars($item['town']); ?>
-                                    </div>
+
                                     <?php if (!empty($item['description'])): ?>
-                                        <p style="font-size: 12px; color: #666; margin-bottom: 14px; line-height: 1.4;">
-                                            <?php echo htmlspecialchars(mb_strimwidth($item['description'], 0, 80, '…')); ?>
+                                        <p class="browse-card-desc">
+                                            <?php echo htmlspecialchars(mb_strimwidth($item['description'], 0, 100, '…')); ?>
                                         </p>
                                     <?php endif; ?>
                                 </div>
 
-                                <?php if ($user_role === 'recipient'): ?>
-                                    <?php if ($is_donor): ?>
-                                        <button type="button" disabled class="recipient-item-btn" style="background:#78909c; color:#fff; cursor:not-allowed; opacity:0.9;" title="You donated this item. Only other recipients can request it.">
-                                            Your Donation
-                                        </button>
-                                    <?php elseif ($is_requested): ?>
-                                        <button disabled class="recipient-item-btn" style="background:#e0e0e0; color:#757575; cursor:not-allowed;">
-                                            ✓ Already Requested
-                                        </button>
-                                    <?php else: ?>
-                                        <form method="POST" action="browse_donations.php" class="recipient-item-form">
-                                            <input type="hidden" name="action" value="request_item">
-                                            <input type="hidden" name="donation_id" value="<?php echo $item['donation_id']; ?>">
-                                            <button type="submit" class="btn-primary-db recipient-item-btn">
-                                                Request Item
-                                            </button>
-                                        </form>
-                                    <?php endif; ?>
-                                <?php else: ?>
-                                    <span style="font-size:12px; color:#888; text-align:center; display:block;">Donor View Only</span>
-                                <?php endif; ?>
+                                <!-- Action Bar -->
+                                <div class="browse-card-action-bar">
+                                    <div class="browse-card-status-info">
+                                        <span class="browse-status-dot"></span>
+                                        <span class="browse-status-text">Available</span>
+                                    </div>
+
+                                    <div class="browse-card-action-btn-wrap">
+                                        <?php if ($user_role === 'recipient'): ?>
+                                            <?php if ($is_donor): ?>
+                                                <button type="button" disabled class="browse-action-btn btn-own-donation" title="You donated this item.">
+                                                    <i class="fa-solid fa-heart"></i> Your Donation
+                                                </button>
+                                            <?php elseif ($is_requested): ?>
+                                                <button type="button" disabled class="browse-action-btn btn-already-requested">
+                                                    <i class="fa-solid fa-check"></i> Already Requested
+                                                </button>
+                                            <?php else: ?>
+                                                <form method="POST" action="browse_donations.php" class="browse-request-form">
+                                                    <input type="hidden" name="action" value="request_item">
+                                                    <input type="hidden" name="donation_id" value="<?php echo $item['donation_id']; ?>">
+                                                    <button type="submit" class="browse-action-btn btn-request-item">
+                                                        <i class="fa-solid fa-hand-holding-heart"></i> Request Item
+                                                    </button>
+                                                </form>
+                                            <?php endif; ?>
+                                        <?php else: ?>
+                                            <span class="browse-donor-notice">
+                                                <i class="fa-solid fa-eye"></i> Donor View Only
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     <?php endforeach; ?>
                 </div>
+
+                <!-- See More & See Less Pagination Bar (Server-Side) -->
+                <?php if ($total_pages > 1): ?>
+                    <div class="browse-pagination-bar">
+                        <div class="browse-pagination-info">
+                            Showing <strong><?php echo $range_start; ?>–<?php echo $range_end; ?></strong> of <strong><?php echo $total_items; ?></strong> items
+                        </div>
+                        <div class="browse-pagination-btns">
+                            <?php if ($current_page > 1): ?>
+                                <a href="browse_donations.php?<?php echo http_build_query(array_merge($pagination_params, ['page' => $current_page - 1])); ?>" class="btn-browse-page btn-page-less">
+                                    <i class="fa-solid fa-chevron-left"></i> See Less
+                                </a>
+                            <?php endif; ?>
+                            <?php if ($current_page < $total_pages): ?>
+                                <a href="browse_donations.php?<?php echo http_build_query(array_merge($pagination_params, ['page' => $current_page + 1])); ?>" class="btn-browse-page btn-page-more">
+                                    See More <i class="fa-solid fa-chevron-right"></i>
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
             <?php endif; ?>
         </div>
 

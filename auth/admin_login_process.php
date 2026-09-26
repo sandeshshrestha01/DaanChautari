@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// ── Collect & sanitize inputs ─────────────────────────────────────────────────
+//--------------- Collect & sanitize inputs ----------------───
 $email    = trim(filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL) ?? '');
 $password = $_POST['password'] ?? '';
 
@@ -23,7 +23,7 @@ if (!$email || empty($password)) {
     exit;
 }
 
-// ── Database lookup ───────────────────────────────────────────────────────────
+//--------------- Database lookup ----------------─────────────
 try {
     $stmt = $pdo->prepare(
         "SELECT * FROM users WHERE email = :email AND status = 'active'"
@@ -39,7 +39,7 @@ try {
             exit;
         }
 
-        // ── Establish session ─────────────────────────────────────────────
+        //--------------- Establish session ----------------──────────────────────
         session_regenerate_id(true); // Prevent session fixation
         $_SESSION['user_id']    = $user['user_id'];
         $_SESSION['user_name']  = $user['full_name'];

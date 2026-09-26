@@ -13,7 +13,7 @@
   --white: #ffffff;
 }
 
-/* ─── PAGE HERO ─── */
+/* --------PAGE HERO --------*/
 .vol-hero {
   background: linear-gradient(135deg, var(--dark-green) 0%, var(--primary-green) 50%, var(--light-green) 100%);
   padding: 140px 20px 80px;
@@ -86,7 +86,7 @@
   margin: 0 auto;
 }
 
-/* ─── WAVE DIVIDER ─── */
+/* --------WAVE DIVIDER --------*/
 .vol-wave {
   display: block;
   width: 100%;
@@ -101,13 +101,13 @@
   height: 60px;
 }
 
-/* ─── SECTION WRAPPER ─── */
+/* --------SECTION WRAPPER --------*/
 .vol-section {
   padding: 60px 20px 80px;
   background: #fafafa;
 }
 
-/* ─── LAYOUT: 2-COLUMN ─── */
+/* --------LAYOUT: 2-COLUMN --------*/
 .vol-layout {
   max-width: 1140px;
   margin: 0 auto;
@@ -117,7 +117,7 @@
   align-items: start;
 }
 
-/* ─── LEFT: Info Panel ─── */
+/* --------LEFT: Info Panel --------*/
 .vol-info {
   position: sticky;
   top: 100px;
@@ -235,7 +235,7 @@
   letter-spacing: 0.4px;
 } */
 
-/* ─── RIGHT: Form Card ─── */
+/* --------RIGHT: Form Card --------*/
 .vol-form-card {
   background: #fff;
   border-radius: 20px;
@@ -630,7 +630,7 @@
   gap: 5px;
 }
 
-/* ─── SUCCESS STATE ─── */
+/* --------SUCCESS STATE --------*/
 .vol-success {
   text-align: center;
   padding: 50px 30px;
@@ -748,7 +748,7 @@
   background: #f1f8e9;
 }
 
-/* ─── Error alert ─── */
+/* --------Error alert --------*/
 .vol-error-alert {
   background: #ffebee;
   border: 1px solid #ffcdd2;
@@ -763,7 +763,7 @@
   gap: 10px;
 }
 
-/* ─── RESPONSIVE ─── */
+/* --------RESPONSIVE --------*/
 @media (max-width: 900px) {
   .vol-layout {
     grid-template-columns: 1fr;

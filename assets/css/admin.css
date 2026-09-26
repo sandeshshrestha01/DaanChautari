@@ -37,7 +37,7 @@
   --radius:        12px;
 }
 
-/* ─── Body ──────────────────────────────────────────────── */
+/* --------Body ----------------──────────────────────--------*/
 body.admin-body {
   font-family: 'Inter', sans-serif;
   background: var(--content-bg);
@@ -47,7 +47,7 @@ body.admin-body {
   font-size: 14px;
 }
 
-/* ─── Sidebar ───────────────────────────────────────────── */
+/* --------Sidebar ----------------───────────────────--------*/
 .admin-sidebar {
   width: var(--sidebar-width);
   background: var(--sidebar-bg);
@@ -175,7 +175,7 @@ body.admin-body {
 
 .sidebar-foot a:hover { background: rgba(198,40,40,0.15); }
 
-/* ─── Main ──────────────────────────────────────────────── */
+/* --------Main ----------------──────────────────────--------*/
 .admin-main {
   margin-left: var(--sidebar-width);
   flex: 1;
@@ -184,7 +184,7 @@ body.admin-body {
   min-height: 100vh;
 }
 
-/* ─── Topbar ─────────────────────────────────────────────── */
+/* --------Topbar ----------------─────────────────────--------*/
 .admin-topbar {
   height: var(--topbar-h);
   background: var(--card);
@@ -221,6 +221,11 @@ body.admin-body {
   flex-shrink: 0;
 }
 
+img.admin-ava {
+  object-fit: cover;
+  display: block;
+}
+
 .sidebar-toggle-btn {
   display: none;
   background: none;
@@ -232,14 +237,14 @@ body.admin-body {
   border-radius: 6px;
 }
 
-/* ─── Content ────────────────────────────────────────────── */
+/* --------Content ----------------────────────────────--------*/
 .admin-content { padding: 26px; flex: 1; }
 
 .page-hdr { margin-bottom: 22px; }
 .page-hdr h2 { font-size: 21px; font-weight: 800; }
 .page-hdr p  { font-size: 13px; color: var(--muted); margin-top: 4px; }
 
-/* ─── Stats Grid ─────────────────────────────────────────── */
+/* --------Stats Grid ----------------─────────────────--------*/
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
@@ -293,7 +298,7 @@ body.admin-body {
 .stat-num   { font-size: 28px; font-weight: 800; line-height: 1; margin-bottom: 5px; }
 .stat-label { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
 
-/* ─── Category Bar ───────────────────────────────────────── */
+/* --------Category Bar ----------------───────────────--------*/
 .cat-bar {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
@@ -318,7 +323,7 @@ body.admin-body {
 .cat-num   { font-size: 20px; font-weight: 800; line-height: 1; }
 .cat-name  { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .3px; }
 
-/* ─── Section Row ─────────────────────────────────────────── */
+/* --------Section Row ----------------─────────────────--------*/
 .sec-row {
   display: flex;
   align-items: flex-end;
@@ -331,7 +336,7 @@ body.admin-body {
 .sec-row h3 { font-size: 16px; font-weight: 700; }
 .sec-row p  { font-size: 12px; color: var(--muted); margin-top: 2px; }
 
-/* ─── Item Gallery ───────────────────────────────────────── */
+/* --------Item Gallery ----------------───────────────--------*/
 .items-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -407,7 +412,7 @@ body.admin-body {
 .donor-nm  { font-size: 11.5px; font-weight: 600; }
 .donor-loc { font-size: 10.5px; color: var(--muted); }
 
-/* ─── Panel / Table ──────────────────────────────────────── */
+/* --------Panel / Table ----------------──────────────--------*/
 .admin-panel {
   background: var(--card);
   border-radius: var(--radius);
@@ -456,7 +461,7 @@ body.admin-body {
 .admin-table tr:last-child td { border-bottom: none; }
 .admin-table tbody tr:hover td { background: #f8fbf8; }
 
-/* ─── Badges ─────────────────────────────────────────────── */
+/* --------Badges ----------------─────────────────────--------*/
 .badge {
   display: inline-block;
   padding: 3px 9px;
@@ -482,7 +487,7 @@ body.admin-body {
 .b-donor     { background: var(--info-lt); color: var(--info); }
 .b-recipient { background: var(--purple-lt); color: var(--purple); }
 
-/* ─── Buttons ────────────────────────────────────────────── */
+/* --------Buttons ----------------────────────────────--------*/
 .btn {
   display: inline-flex;
   align-items: center;
@@ -523,7 +528,7 @@ body.admin-body {
 }
 .btn-outline:hover { background: var(--primary); color: #fff; }
 
-/* ─── Filter Bar ─────────────────────────────────────────── */
+/* --------Filter Bar ----------------─────────────────--------*/
 .filter-bar {
   display: flex;
   align-items: center;
@@ -550,7 +555,7 @@ body.admin-body {
 
 .search-input { min-width: 220px; }
 
-/* ─── Disaster Relief Banner ──────────────────────────────── */
+/* --------Disaster Relief Banner ----------------──────--------*/
 .disaster-banner {
   background: linear-gradient(135deg, #b71c1c 0%, #d32f2f 50%, #c62828 100%);
   border-radius: var(--radius);
@@ -586,7 +591,7 @@ body.admin-body {
 .d-badge .n { font-size: 22px; font-weight: 800; display: block; }
 .d-badge .l { font-size: 10px; opacity: .8; text-transform: uppercase; letter-spacing: .5px; }
 
-/* ─── User Cell ──────────────────────────────────────────── */
+/* --------User Cell ----------------──────────────────--------*/
 .user-cell { display: flex; align-items: center; gap: 10px; }
 
 .u-ava {
@@ -599,10 +604,20 @@ body.admin-body {
   flex-shrink: 0;
 }
 
+img.u-ava, .u-ava-img {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(0, 0, 0, 0.08);
+}
+
 .u-name  { font-size: 13.5px; font-weight: 600; }
 .u-email { font-size: 11.5px; color: var(--muted); }
 
-/* ─── Item Thumb in Table ────────────────────────────────── */
+/* --------Item Thumb in Table ----------------────────--------*/
 .item-thumb {
   width: 46px; height: 46px;
   border-radius: 8px;
@@ -617,7 +632,7 @@ body.admin-body {
   font-size: 22px;
 }
 
-/* ─── Empty State ────────────────────────────────────────── */
+/* --------Empty State ----------------────────────────--------*/
 .empty-state {
   text-align: center;
   padding: 56px 20px;
@@ -628,7 +643,7 @@ body.admin-body {
 .empty-state h3  { font-size: 15px; font-weight: 600; color: #1c1c1c; margin-bottom: 6px; }
 .empty-state p   { font-size: 13px; }
 
-/* ─── Responsive ─────────────────────────────────────────── */
+/* --------Responsive ----------------─────────────────--------*/
 @media (max-width: 960px) {
   .admin-sidebar { transform: translateX(-100%); }
   .admin-sidebar.open { transform: translateX(0); }
@@ -653,7 +668,7 @@ body.admin-body {
    Dashboard Page — Specific Styles
    ═══════════════════════════════════════════════════════════ */
 
-/* ─── Dashboard Header ───────────────────────────────────── */
+/* --------Dashboard Header ----------------───────────--------*/
 .dash-header {
   display: flex;
   align-items: flex-end;
@@ -675,7 +690,7 @@ body.admin-body {
   color: var(--muted);
 }
 
-/* ─── Dashboard Stat Cards ───────────────────────────────── */
+/* --------Dashboard Stat Cards ----------------───────--------*/
 .dash-stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -740,7 +755,7 @@ body.admin-body {
   color: var(--muted);
 }
 
-/* ─── Dashboard Two-Column Grid ──────────────────────────── */
+/* --------Dashboard Two-Column Grid ----------------──--------*/
 .dash-grid {
   display: grid;
   grid-template-columns: 1fr 300px;
@@ -748,7 +763,7 @@ body.admin-body {
   align-items: start;
 }
 
-/* ─── Dashboard Panel ────────────────────────────────────── */
+/* --------Dashboard Panel ----------------────────────--------*/
 .dash-panel {
   background: var(--card);
   border-radius: var(--radius);
@@ -783,7 +798,7 @@ body.admin-body {
 
 .dview-all:hover { opacity: .75; }
 
-/* ─── Chart Container ────────────────────────────────────── */
+/* --------Chart Container ----------------────────────--------*/
 .chart-wrap {
   padding: 16px 18px 10px;
   border-bottom: 1px solid var(--border);
@@ -834,7 +849,7 @@ body.admin-body {
   font-size: 12px;
 }
 
-/* ─── Dashboard Table ────────────────────────────────────── */
+/* --------Dashboard Table ----------------────────────--------*/
 .dtbl-wrap { overflow-x: auto; }
 
 .dash-table {
@@ -868,7 +883,7 @@ body.admin-body {
 .dtd-bold { font-weight: 600; color: var(--text); }
 .dtd-muted { font-size: 12px; color: var(--muted); }
 
-/* ─── Dashboard Badges ───────────────────────────────────── */
+/* --------Dashboard Badges ----------------───────────--------*/
 .dbadge {
   display: inline-block;
   padding: 3px 9px;
@@ -887,7 +902,7 @@ body.admin-body {
 .db-rejected  { background: #ffebee; color: #c62828; }
 .db-muted     { background: #e0e0e0; color: #3a3a3a; }
 
-/* ─── Requester user cell ────────────────────────────────── */
+/* --------Requester user cell ----------------────────--------*/
 .dreq-user {
   display: flex;
   align-items: center;
@@ -904,7 +919,7 @@ body.admin-body {
   flex-shrink: 0;
 }
 
-/* ─── Approve / Reject Buttons ───────────────────────────── */
+/* --------Approve / Reject Buttons ----------------───--------*/
 .dreq-actions {
   display: flex;
   gap: 5px;
@@ -929,7 +944,7 @@ body.admin-body {
 .dact-reject  { background: #ffebee; color: #c62828; }
 .dact-reject:hover { background: #c62828; color: #fff; }
 
-/* ─── Quick Actions ──────────────────────────────────────── */
+/* --------Quick Actions ----------------──────────────--------*/
 .dquick-list {
   padding: 8px 0;
 }
@@ -1008,7 +1023,7 @@ body.admin-body {
   font-weight: 300;
 }
 
-/* ─── Recent Activity ────────────────────────────────────── */
+/* --------Recent Activity ----------------────────────--------*/
 .dactivity-list {
   padding: 10px 18px 14px;
 }
@@ -1047,7 +1062,7 @@ body.admin-body {
   flex-shrink: 0;
 }
 
-/* ─── Dashboard Responsive ───────────────────────────────── */
+/* --------Dashboard Responsive ----------------───────--------*/
 @media (max-width: 1100px) {
   .dash-stats { grid-template-columns: repeat(2, 1fr); }
   .dash-grid  { grid-template-columns: 1fr; }
@@ -1329,14 +1344,14 @@ body.admin-body {
    Manage Users & Line Chart Page Styles
    ═══════════════════════════════════════════════════════════ */
 
-/* ─── Role & Status Badges ───────────────────────────────── */
+/* --------Role & Status Badges ----------------───────--------*/
 .badge-admin    { background: #ede7f6; color: #4527a0; }
 .badge-volunteer{ background: #e0f2f1; color: #00695c; }
 .b-donor        { background: #e3f2fd; color: #0277bd; }
 .b-recipient    { background: #f3e5f5; color: #7b1fa2; }
 .badge-id       { background: #f0f2f0; color: #555; font-family: monospace; font-size: 11px; padding: 2px 6px; border-radius: 4px; }
 
-/* ─── User Navigation Tabs ───────────────────────────────── */
+/* --------User Navigation Tabs ----------------───────--------*/
 .user-tabs-bar {
   display: flex;
   align-items: center;
@@ -1394,7 +1409,7 @@ body.admin-body {
   color: var(--primary);
 }
 
-/* ─── Chart Panel & Controls ─────────────────────────────── */
+/* --------Chart Panel & Controls ----------------─────--------*/
 .chart-header-actions {
   display: flex;
   align-items: center;
@@ -1463,7 +1478,7 @@ body.admin-body {
   margin-top: 4px;
 }
 
-/* ─── Filter Bar Extensions ──────────────────────────────── */
+/* --------Filter Bar Extensions ----------------──────--------*/
 .user-filter-card {
   background: var(--card);
   border: 1px solid var(--border);
@@ -1510,7 +1525,7 @@ body.admin-body {
   padding-left: 36px;
 }
 
-/* ─── Table Utilities ────────────────────────────────────── */
+/* --------Table Utilities ----------------────────────--------*/
 .u-avatar-wrap {
   position: relative;
   display: inline-block;
@@ -1603,7 +1618,7 @@ body.admin-body {
   font-weight: 500;
 }
 
-/* ─── Modal Dialogs ──────────────────────────────────────── */
+/* --------Modal Dialogs ----------------──────────────--------*/
 .admin-modal-overlay {
   display: none;
   position: fixed;
@@ -1795,7 +1810,7 @@ body.admin-body {
   color: var(--muted);
 }
 
-/* ─── Donation Management Extensions ─────────────────────── */
+/* --------Donation Management Extensions----------------─--------*/
 .don-thumb-wrap {
   position: relative;
   width: 46px;

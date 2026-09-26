@@ -4,7 +4,7 @@ $page_title = 'Our Services';
 include_once "../includes/header.php";
 ?>
 
-<!-- ─── PAGE HERO ─── -->
+<!-- --------PAGE HERO ---------->
 <section class="page-hero">
     <div class="page-hero-inner">
         <div class="eyebrow"><span class="dot"></span> What We Do</div>
@@ -13,7 +13,7 @@ include_once "../includes/header.php";
     </div>
 </section>
 
-<!-- ─── CORE SERVICES ─── -->
+<!-- --------CORE SERVICES ---------->
 <section class="section">
     <div class="section-header">
         <h2>What We Offer</h2>
@@ -134,7 +134,7 @@ include_once "../includes/header.php";
     </div>
 </section>
 
-<!-- ─── HOW IT WORKS ─── -->
+<!-- --------HOW IT WORKS ---------->
 <section class="section section-bg">
     <div class="section-header">
         <h2>How The Process Works</h2>
@@ -171,7 +171,8 @@ include_once "../includes/header.php";
     </div>
 </section>
 
-<!-- ─── CTA ─── -->
+<!-- --------CTA ---------->
+ <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'donor'): ?>
 <section class="section">
     <div class="volunteer-cta">
         <div class="volunteer-cta-text">
@@ -179,12 +180,13 @@ include_once "../includes/header.php";
             <p>It takes less than 5 minutes to list your first donation. Join 80+ donors who are already changing lives across Nepal.</p>
         </div>
         <div>
-            <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'donor'): ?>
+            
                 <a href="donate.php" class="secondary-btn" style="padding:14px 32px;font-size:15px;">Start Donating Now →</a>
-            <?php endif; ?>
+            
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 
 <?php include_once "../includes/footer.php"; ?>

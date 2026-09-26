@@ -9,7 +9,7 @@ $extra_css  = ['volunteer.css'];
 $page_title = 'Become a Volunteer';
 require __DIR__ . '/../includes/header.php';
 
-// ─── Handle POST ──────────────────────────────────────────────────────────────
+// --------Handle POST ----------------────────────────
 $submitted   = false;
 $errors      = [];
 $vol_ref     = '';
@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $skills       = trim($_POST['skills']       ?? '');
     $availability = trim($_POST['availability'] ?? '');
 
-    // ── Validation ────────────────────────────────────────────────────────────
+    //--------------- Validation ----------------──────────────
     if (empty($full_name))    $errors[] = 'Full name is required.';
     if (empty($phone))        $errors[] = 'Phone number is required.';
     if (empty($town))         $errors[] = 'Town / City is required.';
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $errors[] = 'Phone number must be 7–15 digits.';
     }
 
-    // ── Insert ────────────────────────────────────────────────────────────────
+    //--------------- Insert ----------------──────────────────
     if (empty($errors)) {
         try {
             $stmt = $pdo->prepare("
@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $vol_ref   = 'DC-VOL-' . str_pad($new_id, 5, '0', STR_PAD_LEFT);
             $submitted = true;
 
-            // ── Activity log (no user_id since public) ────────────────────────
+            //--------------- Activity log (no user_id since public) ----------------─
             try {
                 $log = $pdo->prepare("
                     INSERT INTO activity_logs (user_id, action, module, reference_id)
@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 $old = $_POST ?? [];
 ?>
 
-<!-- ─── HERO ─── -->
+<!-- --------HERO ---------->
 <section class="vol-hero">
     <div class="vol-hero-inner">
         <div class="eyebrow">
@@ -100,7 +100,7 @@ $old = $_POST ?? [];
     </svg>
 </div>
 
-<!-- ─── MAIN SECTION ─── -->
+<!-- --------MAIN SECTION ---------->
 <section class="vol-section">
     <div class="vol-layout">
 
@@ -230,7 +230,7 @@ $old = $_POST ?? [];
                 <form method="POST" action="volunteer.php" id="volunteerForm" novalidate>
                     <input type="hidden" name="action" value="volunteer_register">
 
-                    <!-- ── SECTION 1: Personal Information ── -->
+                    <!----------------- SECTION 1: Personal Information--------------- -->
                     <div class="vf-section-label">👤 Personal Information</div>
 
                     <div class="vf-row">
@@ -275,7 +275,7 @@ $old = $_POST ?? [];
 
                     <div class="vf-divider"></div>
 
-                    <!-- ── SECTION 2: Location ── -->
+                    <!----------------- SECTION 2: Location--------------- -->
                     <div class="vf-section-label">📍 Location Details</div>
 
                     <div class="vf-row">
@@ -307,7 +307,7 @@ $old = $_POST ?? [];
 
                     <div class="vf-divider"></div>
 
-                    <!-- ── SECTION 3: Skills & Availability ── -->
+                    <!----------------- SECTION 3: Skills & Availability--------------- -->
                     <div class="vf-section-label">⚡ Skills & Availability</div>
 
                     <!-- Skills Tag Input -->
@@ -380,9 +380,9 @@ $old = $_POST ?? [];
     </div><!-- /.vol-layout -->
 </section>
 
-<!-- ─── SCRIPT: Skills Tags + Availability ─── -->
+<!-- --------SCRIPT: Skills Tags + Availability ---------->
 <script>
-// ── SKILLS TAG SYSTEM ─────────────────────────────────────────────────────────
+//--------------- SKILLS TAG SYSTEM ----------------───────────
 const skillsWrap    = document.getElementById('skillsTagsWrap');
 const skillsInput   = document.getElementById('skillsTagInput');
 const skillsHidden  = document.getElementById('vf_skills_value');
@@ -445,7 +445,7 @@ skillsInput.addEventListener('keydown', function(e) {
     }
 });
 
-// ── AVAILABILITY CHECKBOXES ───────────────────────────────────────────────────
+//--------------- AVAILABILITY CHECKBOXES ----------------─────
 function updateAvailability() {
     const checks  = document.querySelectorAll('#availGrid input[type="checkbox"]');
     const selected = [];
@@ -461,7 +461,7 @@ function updateAvailability() {
     document.getElementById('vf_availability_value').value = selected.join(', ');
 }
 
-// ── CLIENT-SIDE VALIDATION ────────────────────────────────────────────────────
+//--------------- CLIENT-SIDE VALIDATION ----------------──────
 document.getElementById('volunteerForm').addEventListener('submit', function(e) {
     let valid = true;
     const required = ['vf_full_name', 'vf_phone', 'vf_town'];
@@ -512,7 +512,7 @@ document.querySelectorAll('.vf-group input, .vf-group select, .vf-group textarea
     el.addEventListener('input', () => el.classList.remove('invalid'));
 });
 
-// ── HELPERS ───────────────────────────────────────────────────────────────────
+//--------------- HELPERS ----------------─────────────────────
 function escHtml(str) {
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }

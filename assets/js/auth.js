@@ -5,7 +5,7 @@
 
 document.addEventListener('DOMContentLoaded', function () {
 
-    // ── 1. Role Cards (Signup Page) ──────────────────────────────────────────────
+    //--------------- 1. Role Cards (Signup Page) ----------------
     const roleCards = document.querySelectorAll('.role-card');
     if (roleCards.length > 0) {
         // Mark initial selected radio's card as active
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // ── 2. Password Match & Validation (Signup Form) ─────────────────────────────
+    //--------------- 2. Password Match & Validation (Signup Form) ----------------──────
     const signupForm = document.querySelector('form[action="signup_process.php"]');
     if (signupForm) {
         signupForm.addEventListener('submit', function (e) {
@@ -75,25 +75,51 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // ── 3. Toggle Password Visibility (Admin & General Auth Forms) ────────────────
-    const togglePwBtn = document.getElementById('togglePw');
-    if (togglePwBtn) {
-        togglePwBtn.addEventListener('click', function () {
-            const pwInput = document.getElementById('admin_password') || document.getElementById('password');
-            const eyeIcon = document.getElementById('eyeIcon');
-            if (pwInput) {
-                const isText = pwInput.type === 'text';
-                pwInput.type = isText ? 'password' : 'text';
-                if (eyeIcon) {
-                    eyeIcon.innerHTML = isText
-                        ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
-                        : '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
+    //--------------- 3. Toggle Password Visibility (Admin, Login, Signup & Reset Forms)---------------──────
+    const eyeOpenSvg = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+    const eyeClosedSvg = '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
+
+    const pwToggleButtons = document.querySelectorAll('.toggle-pw-btn, .admin-toggle-pw, #togglePw');
+    const boundPwButtons = new Set();
+
+    pwToggleButtons.forEach(function (btn) {
+        if (boundPwButtons.has(btn)) return;
+        boundPwButtons.add(btn);
+
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            // Locate target input: data-target attribute, parent container input, or fallback IDs
+            let pwInput = null;
+            const targetId = btn.getAttribute('data-target');
+            if (targetId) {
+                pwInput = document.getElementById(targetId);
+            }
+            if (!pwInput) {
+                const wrap = btn.closest('.password-input-wrap, .admin-input-wrap');
+                if (wrap) {
+                    pwInput = wrap.querySelector('input');
                 }
             }
-        });
-    }
+            if (!pwInput) {
+                pwInput = document.getElementById('admin_password') || document.getElementById('password');
+            }
 
-    // ── 4. Admin Login Spinner & Submit Handler ──────────────────────────────────
+            if (!pwInput) return;
+
+            const eyeIcon = btn.querySelector('svg') || document.getElementById('eyeIcon');
+            const isText = pwInput.type === 'text';
+            pwInput.type = isText ? 'password' : 'text';
+
+            btn.setAttribute('aria-label', isText ? 'Show password' : 'Hide password');
+
+            if (eyeIcon) {
+                eyeIcon.innerHTML = isText ? eyeOpenSvg : eyeClosedSvg;
+            }
+        });
+    });
+
+    //--------------- 4. Admin Login Spinner & Submit Handler ----------------───────────
     const adminLoginForm = document.getElementById('adminLoginForm');
     if (adminLoginForm) {
         adminLoginForm.addEventListener('submit', function () {

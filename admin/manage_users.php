@@ -5,7 +5,7 @@
  * and an interactive registration trend line chart.
  */
 
-// ── Handle POST & CSV Export BEFORE any HTML output ──────────────────────────
+//--------------- Handle POST & CSV Export BEFORE any HTML output ----------------───
 require_once __DIR__ . '/../database/config.php';
 require_once __DIR__ . '/../database/db.php';
 
@@ -19,7 +19,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
 $current_admin_id = (int)$_SESSION['user_id'];
 $page_title       = 'Manage Users';
 
-// ── 1. CSV Export Handler ─────────────────────────────────────────────────────
+//--------------- 1. CSV Export Handler ----------------───────
 if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     $export_role = $_GET['role'] ?? 'all';
     $filename    = 'daan_chautari_' . ($export_role === 'volunteer' ? 'volunteers' : 'users') . '_' . date('Y-m-d') . '.csv';
@@ -50,7 +50,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     exit;
 }
 
-// ── 2. POST Action Dispatcher ────────────────────────────────────────────────
+//--------------- 2. POST Action Dispatcher ----------------──
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     $action = $_POST['action'] ?? '';
 
@@ -211,7 +211,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     }
 }
 
-// ── 3. Overview Metrics & Statistics ─────────────────────────────────────────
+//--------------- 3. Overview Metrics & Statistics ----------------──────────────────
 $total_users      = (int)$pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
 $total_donors     = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE role = 'donor'")->fetchColumn();
 $total_recipients = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE role = 'recipient'")->fetchColumn();
@@ -221,7 +221,7 @@ $pending_vols     = (int)$pdo->query("SELECT COUNT(*) FROM volunteers WHERE stat
 $active_users     = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE status = 'active'")->fetchColumn();
 $active_rate      = $total_users > 0 ? round(($active_users / $total_users) * 100) : 100;
 
-// ── 4. Line Chart Data Preparation ───────────────────────────────────────────
+//--------------- 4. Line Chart Data Preparation ----------------────────────────────
 // Time range: 7, 14, or 30 days
 $chart_days_limit = isset($_GET['days']) && in_array((int)$_GET['days'], [7, 14, 30]) ? (int)$_GET['days'] : 14;
 
@@ -292,7 +292,7 @@ for ($i = $chart_days_limit - 1; $i >= 0; $i--) {
 $period_new_users = array_sum($chart_total_data);
 $period_new_vols  = array_sum($chart_vol_data);
 
-// ── 5. Filtering & Querying Records ──────────────────────────────────────────
+//--------------- 5. Filtering & Querying Records ----------------───────────────────
 $role_filter   = $_GET['role']   ?? 'all';
 $status_filter = $_GET['status'] ?? 'all';
 $search_query  = trim($_GET['search'] ?? '');
@@ -356,7 +356,7 @@ if ($is_volunteer_view) {
     $volunteers_list = [];
 }
 
-// ── 6. Include Admin Layout Header ───────────────────────────────────────────
+//--------------- 6. Include Admin Layout Header ----------------────────────────────
 require_once __DIR__ . '/admin_header.php';
 ?>
 
@@ -578,7 +578,7 @@ require_once __DIR__ . '/admin_header.php';
 
     <div class="dtbl-wrap">
         <?php if ($is_volunteer_view): ?>
-            <!-- ─── Volunteer Directory Table ──────────────────────────────── -->
+            <!-- --------Volunteer Directory Table ----------------──────---------->
             <table class="dash-table">
                 <thead>
                     <tr>
@@ -709,7 +709,7 @@ require_once __DIR__ . '/admin_header.php';
             </table>
 
         <?php else: ?>
-            <!-- ─── Registered Users Table ─────────────────────────────────── -->
+            <!-- --------Registered Users Table ----------------─────────---------->
             <table class="dash-table">
                 <thead>
                     <tr>
@@ -748,18 +748,25 @@ require_once __DIR__ . '/admin_header.php';
                         $status_badge = ($user['status'] === 'active') ? 'b-active' : 'b-inactive';
                         $don_count  = (int)($user['total_donations'] ?? 0);
                         $req_count  = (int)($user['total_requests'] ?? 0);
+                        $u_photo_path = !empty($user['profile_photo']) ? ltrim($user['profile_photo'], '/') : '';
+                        $has_photo = !empty($u_photo_path) && file_exists(__DIR__ . '/../' . $u_photo_path);
+                        $photo_url = $has_photo ? BASE_URL . htmlspecialchars($u_photo_path) : '';
                     ?>
                     <tr>
                         <td>
                             <div class="user-cell">
                                 <div class="u-avatar-wrap">
-                                    <div class="u-ava" style="background:<?php
-                                        echo match($u_role) {
-                                            'admin'     => '#4527a0',
-                                            'recipient' => '#7b1fa2',
-                                            default     => '#0277bd',
-                                        };
-                                    ?>;"><?php echo $u_init; ?></div>
+                                    <?php if ($has_photo): ?>
+                                        <img src="<?php echo $photo_url; ?>" alt="<?php echo htmlspecialchars($user['full_name']); ?>" class="u-ava u-ava-img">
+                                    <?php else: ?>
+                                        <div class="u-ava" style="background:<?php
+                                            echo match($u_role) {
+                                                'admin'     => '#4527a0',
+                                                'recipient' => '#7b1fa2',
+                                                default     => '#0277bd',
+                                            };
+                                        ?>;"><?php echo $u_init; ?></div>
+                                    <?php endif; ?>
                                     <span class="u-role-icon <?php echo $u_role; ?>" title="<?php echo ucfirst($u_role); ?>">
                                         <?php echo match($u_role) { 'admin' => '★', 'recipient' => '🤲', default => '🎁' }; ?>
                                     </span>
@@ -831,6 +838,8 @@ require_once __DIR__ . '/admin_header.php';
                                             'joined'     => date('d M Y, h:i A', strtotime($user['created_at'])),
                                             'donations'  => $don_count,
                                             'requests'   => $req_count,
+                                            'photo'      => $photo_url,
+                                            'initial'    => $u_init,
                                         ])); ?>)">
                                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -988,6 +997,22 @@ require_once __DIR__ . '/admin_header.php';
             <button type="button" class="admin-modal-close" onclick="closeModal('userDetailsModal')">&times;</button>
         </div>
         <div class="admin-modal-body">
+            <!-- User Header Card with Avatar -->
+            <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 18px; padding: 14px 16px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
+                <div style="position: relative; flex-shrink: 0;">
+                    <img id="modalUserAvatarImg" src="" alt="Avatar" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid #10b981; display: none;">
+                    <div id="modalUserAvatarInit" style="width: 52px; height: 52px; border-radius: 50%; background: #0277bd; color: #fff; font-size: 22px; font-weight: 700; display: flex; align-items: center; justify-content: center;"></div>
+                </div>
+                <div style="flex: 1; min-width: 0;">
+                    <h4 id="modalUserHeaderName" style="margin: 0 0 4px 0; font-size: 16px; font-weight: 700; color: #1e293b;">—</h4>
+                    <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                        <span id="modalUserHeaderRole" class="badge b-donor">Donor</span>
+                        <span id="modalUserHeaderStatus" class="badge b-active">Active</span>
+                        <span id="modalUserHeaderId" style="font-size: 11px; color: #64748b; font-weight: 600;">#USR-—</span>
+                    </div>
+                </div>
+            </div>
+
             <div class="profile-meta-grid">
                 <div class="pm-item">
                     <div class="pm-label">User ID</div>
@@ -1094,7 +1119,7 @@ require_once __DIR__ . '/admin_header.php';
 <!-- ═══════════════════════ CHART.JS & PAGE SCRIPTS ═══════════════════════ -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // ── 1. Initialize Registration Growth Line Chart ──────────────────────────
+    //--------------- 1. Initialize Registration Growth Line Chart ----------------───
     const lineCtx = document.getElementById('usersGrowthLineChart');
     if (lineCtx) {
         const labels     = <?php echo json_encode($chart_labels); ?>;
@@ -1217,7 +1242,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// ── Modal Helpers ─────────────────────────────────────────────────────────────
+//--------------- Modal Helpers ----------------───────────────
 function openAddUserModal() {
     document.getElementById('addUserModal').classList.add('active');
 }
@@ -1234,6 +1259,33 @@ function openUserDetailsModal(data) {
     document.getElementById('modalUserJoined').innerText = data.joined;
     document.getElementById('modalUserDonations').innerText = data.donations;
     document.getElementById('modalUserRequests').innerText = data.requests;
+
+    // Header card
+    document.getElementById('modalUserHeaderName').innerText = data.name;
+    document.getElementById('modalUserHeaderId').innerText = '#USR-' + data.id;
+    document.getElementById('modalUserHeaderRole').innerText = data.role;
+    document.getElementById('modalUserHeaderStatus').innerText = data.status;
+    
+    const roleLower = (data.role || '').toLowerCase();
+    const roleClass = 'badge ' + (roleLower === 'admin' ? 'badge-admin' : (roleLower === 'recipient' ? 'b-recipient' : 'b-donor'));
+    document.getElementById('modalUserHeaderRole').className = roleClass;
+
+    const statusLower = (data.status || '').toLowerCase();
+    document.getElementById('modalUserHeaderStatus').className = 'badge ' + (statusLower === 'active' ? 'b-active' : 'b-inactive');
+
+    const avatarImg = document.getElementById('modalUserAvatarImg');
+    const avatarInit = document.getElementById('modalUserAvatarInit');
+    if (data.photo) {
+        avatarImg.src = data.photo;
+        avatarImg.style.display = 'block';
+        avatarInit.style.display = 'none';
+    } else {
+        avatarImg.style.display = 'none';
+        avatarInit.style.display = 'flex';
+        avatarInit.innerText = data.initial || (data.name ? data.name.charAt(0).toUpperCase() : '?');
+        avatarInit.style.background = (roleLower === 'admin') ? '#4527a0' : ((roleLower === 'recipient') ? '#7b1fa2' : '#0277bd');
+    }
+
     document.getElementById('userDetailsModal').classList.add('active');
 }
 
@@ -1254,7 +1306,7 @@ function closeModalOnBackdrop(event, modalId) {
     }
 }
 
-// ── SweetAlert Confirmation Prompts ───────────────────────────────────────────
+//--------------- SweetAlert Confirmation Prompts ----------------────────────────────
 function confirmToggleStatus(userId, actionType, userName) {
     const isAct = (actionType === 'activate');
     Swal.fire({

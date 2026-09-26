@@ -8,7 +8,7 @@ $extra_css  = ['dashboard.css'];
 $page_title = 'Donate Support';
 include_once "../includes/header.php";
 
-// ── Auth Guard ────────────────────────────────────────────────────────────────
+//--------------- Auth Guard ----------------──────────────────
 if (!isset($_SESSION['user_id'])) {
     set_flash_message('error', 'Please log in to list a donation.');
     header("Location: " . BASE_URL . "auth/login.php");
@@ -23,7 +23,7 @@ if ($_SESSION['user_role'] !== 'donor') {
 
 $donor_id = $_SESSION['user_id'];
 
-// ── Fetch Dynamic Categories from Database ─────────────────────────────────────
+//--------------- Fetch Dynamic Categories from Database ----------------──────────────
 $default_cats = ['Food', 'Clothing', 'Education', 'Essential Needs'];
 try {
     $db_cats = $pdo->query("SELECT DISTINCT category FROM donations WHERE category IS NOT NULL AND category != ''")->fetchAll(PDO::FETCH_COLUMN);
@@ -32,7 +32,7 @@ try {
     $categories = $default_cats;
 }
 
-// ── Pre-fill Category from Cause ID (if coming from Home Page needs) ──────────
+//--------------- Pre-fill Category from Cause ID (if coming from Home Page needs)---------------────────
 $selected_category = '';
 if (isset($_GET['cause_id'])) {
     $cause_id = (int)$_GET['cause_id'];
@@ -45,7 +45,7 @@ if (isset($_GET['cause_id'])) {
     }
 }
 
-// ── Handle POST: Add New Donation ─────────────────────────────────────────────
+//--------------- Handle POST: Add New Donation ----------------──────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_donation') {
     $title       = trim($_POST['title']    ?? '');
     $category    = trim($_POST['category'] ?? '');
@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
     if ($title && !empty($category) && $quantity > 0 && $town) {
 
-        // ── Image Upload ───────────────────────────────────────────────────────
+        //--------------- Image Upload ----------------─────────
         $photo_path = null;
         if (!empty($_FILES['image']['name'])) {
             $file       = $_FILES['image'];
@@ -141,7 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit;
 }
 
-// ── Check if showing Receipt/Reference page ──────────────────────────────────
+//--------------- Check if showing Receipt/Reference page ----------------───────────
 $show_receipt = false;
 $donation = null;
 if (isset($_GET['success']) && $_GET['success'] == 1 && isset($_GET['id'])) {

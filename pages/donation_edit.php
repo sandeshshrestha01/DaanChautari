@@ -4,11 +4,11 @@
  * Handles editing of an existing donation listing.
  */
 
-// ── Bootstrap: config + DB before any HTML output ─────────────────────────────
+//--------------- Bootstrap: config + DB before any HTML output ----------------──────
 require_once "../database/config.php";
 require_once "../database/db.php";
 
-// ── Auth Guard ────────────────────────────────────────────────────────────────
+//--------------- Auth Guard ----------------──────────────────
 if (!isset($_SESSION['user_id'])) {
     set_flash_message('error', 'Please log in to edit a donation.');
     header("Location: " . BASE_URL . "auth/login.php");
@@ -30,11 +30,11 @@ if (!$donation_id) {
     exit;
 }
 
-// ── Detect AJAX ───────────────────────────────────────────────────────────────
+//--------------- Detect AJAX ----------------─────────────────
 $is_ajax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
 
-// ── Helper: JSON for AJAX, flash+redirect for normal ─────────────────────────
+//--------------- Helper: JSON for AJAX, flash+redirect for normal ----------------──
 function edit_respond(bool $ok, string $msg, bool $is_ajax, string $redirect = 'donor_dashboard.php'): void {
     if ($is_ajax) {
         header('Content-Type: application/json');
@@ -46,7 +46,7 @@ function edit_respond(bool $ok, string $msg, bool $is_ajax, string $redirect = '
     exit;
 }
 
-// ── Fetch Donation (needed for validation AND to pre-populate the form) ───────
+//--------------- Fetch Donation (needed for validation AND to pre-populate the form)---------------─────
 try {
     $stmt = $pdo->prepare("SELECT * FROM donations WHERE donation_id = :id AND donor_id = :donor_id");
     $stmt->execute(['id' => $donation_id, 'donor_id' => $donor_id]);
@@ -62,7 +62,7 @@ try {
     edit_respond(false, 'Database error. Please try again.', $is_ajax);
 }
 
-// ── Handle POST: Edit Donation ────────────────────────────────────────────────
+//--------------- Handle POST: Edit Donation ----------------──
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'edit_donation') {
     $title       = trim($_POST['title']    ?? '');
     $category    = trim($_POST['category'] ?? '');
@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     if ($title && !empty($category) && $quantity > 0 && $town) {
         $photo_path = $donation['img_url'];
 
-        // ── Image Upload ───────────────────────────────────────────────────────
+        //--------------- Image Upload ----------------─────────
         if (!empty($_FILES['image']['name'])) {
             $file       = $_FILES['image'];
             $img_types  = ['image/jpeg','image/png','image/webp','image/gif'];
@@ -155,7 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// ── Fetch Dynamic Categories from Database ─────────────────────────────────────
+//--------------- Fetch Dynamic Categories from Database ----------------──────────────
 $default_cats = ['Food', 'Clothing', 'Education', 'Essential Needs'];
 try {
     $db_cats = $pdo->query("SELECT DISTINCT category FROM donations WHERE category IS NOT NULL AND category != ''")->fetchAll(PDO::FETCH_COLUMN);
@@ -164,7 +164,7 @@ try {
     $categories = $default_cats;
 }
 
-// ── Now safe to output HTML ───────────────────────────────────────────────────
+//--------------- Now safe to output HTML ----------------─────
 $extra_css  = ['dashboard.css'];
 $page_title = 'Edit Donation';
 include_once "../includes/header.php";
@@ -303,7 +303,7 @@ function toggleCustomCategory(selectEl, wrapId) {
     }
 }
 
-// ── Image preview helpers ─────────────────────────────────────────────────────
+//--------------- Image preview helpers ----------------───────
 function previewEditImage(input) {
     const thumb     = document.getElementById('edit_image_thumb');
     const removeBtn = document.getElementById('edit_image_remove_btn');
@@ -332,7 +332,7 @@ function clearEditImage() {
     document.getElementById('edit_image_remove_btn').style.display = 'none';
 }
 
-// ── AJAX form submission ──────────────────────────────────────────────────────
+//--------------- AJAX form submission ----------------────────
 document.getElementById('edit-donation-form').addEventListener('submit', function (e) {
     e.preventDefault();
 

@@ -11,7 +11,7 @@
   --white: #ffffff;
 }
 
-/* ── Page Hero ── */
+/*--------------- Page Hero--------------- */
 .page-hero {
     background: linear-gradient(130deg, var(--dark-green) 0%, #1b5e20 45%, var(--accent-green) 100%);
     padding: 130px 24px 80px; text-align:center;
@@ -28,7 +28,7 @@
 .page-hero h1 span { color:var(--primary-yellow); font-style:italic; }
 .page-hero p { font-size:16px; color:rgba(255,255,255,0.95); line-height:1.75; max-width:540px; margin:0 auto; }
 
-/* ── Contact Wrapper ── */
+/*--------------- Contact Wrapper--------------- */
 .contact-wrapper {
     max-width:1100px; margin:0 auto;
     display:grid; grid-template-columns:0.85fr 1.15fr; gap:56px; align-items:flex-start;

@@ -55,7 +55,7 @@ try {
     $categories = $default_cats;
 }
 
-// ── Handle POST: Create General Aid Request ────────────────────────────────────
+//--------------- Handle POST: Create General Aid Request ----------------─────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'request_support') {
     $title       = trim($_POST['title'] ?? '');
     $category    = trim($_POST['category'] ?? '');

@@ -84,12 +84,28 @@ include_once "../includes/header.php";
 
             <div class="form-group">
                 <label for="password">New Password</label>
-                <input type="password" id="password" name="password" placeholder="••••••••" required minlength="6">
+                <div class="password-input-wrap">
+                    <input type="password" id="password" name="password" placeholder="••••••••" required minlength="6" autocomplete="new-password">
+                    <button type="button" class="toggle-pw-btn" data-target="password" aria-label="Toggle password visibility">
+                        <svg class="eye-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <div class="form-group">
                 <label for="confirm_password">Confirm New Password</label>
-                <input type="password" id="confirm_password" name="confirm_password" placeholder="••••••••" required minlength="6">
+                <div class="password-input-wrap">
+                    <input type="password" id="confirm_password" name="confirm_password" placeholder="••••••••" required minlength="6" autocomplete="new-password">
+                    <button type="button" class="toggle-pw-btn" data-target="confirm_password" aria-label="Toggle confirm password visibility">
+                        <svg class="eye-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <button type="submit">Update Password →</button>

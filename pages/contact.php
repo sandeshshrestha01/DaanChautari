@@ -88,7 +88,7 @@ try {
 }
 ?>
 
-<!-- ─── PAGE HERO ─── -->
+<!-- --------PAGE HERO ---------->
 <section class="page-hero">
     <div class="page-hero-inner">
         <div class="eyebrow"><span class="dot"></span> Get In Touch</div>
@@ -97,7 +97,7 @@ try {
     </div>
 </section>
 
-<!-- ─── CONTACT CONTENT ─── -->
+<!-- --------CONTACT CONTENT ---------->
 <section class="section">
     <div class="contact-wrapper">
 
@@ -203,7 +203,7 @@ try {
     </div>
 </section>
 
-<!-- ─── MAP / COMMUNITY PRESENCE ─── -->
+<!-- --------MAP / COMMUNITY PRESENCE ---------->
 <section class="section section-bg">
     <div class="section-header">
         <h2>Our Community Reach</h2>

@@ -1,14 +1,11 @@
 <?php
-/**
- * Daan Chautari — Donor Dashboard
- * Displays donation stats, recent donations, and incoming requests for the logged-in donor.
- */
 
-// ── Bootstrap: load config + DB before any HTML output ───────────────────────
+
+//--------------- Bootstrap: load config + DB before any HTML output ----------------
 require_once "../database/config.php";
 require_once "../database/db.php";
 
-// ── Auth Guard (before header.php so redirects still work) ───────────────────
+//--------------- Auth Guard (before header.php so redirects still work)----------------
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'donor') {
     set_flash_message('error', 'Please log in as a Donor to access this page.');
     header("Location: " . BASE_URL . "auth/login.php");
@@ -20,11 +17,11 @@ $donor_name = $_SESSION['user_name'];
 $town       = $_SESSION['town'] ?? '';
 
 
-// ── Detect AJAX (fetch) request ───────────────────────────────────────────────
+//--------------- Detect AJAX (fetch) request ----------------─
 $is_ajax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
 
-// ── Helper: AJAX JSON response OR flash + redirect ────────────────────────────
+//--------------- Helper: AJAX JSON response OR flash + redirect ----------------─────
 function ajax_respond(bool $ok, string $msg, bool $is_ajax): void {
     if ($is_ajax) {
         header('Content-Type: application/json');
@@ -36,7 +33,7 @@ function ajax_respond(bool $ok, string $msg, bool $is_ajax): void {
     exit;
 }
 
-// ── Handle POST: Add New Donation ─────────────────────────────────────────────
+//--------------- Handle POST: Add New Donation ----------------──────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_donation') {
     $title       = trim($_POST['title']    ?? '');
     $category    = trim($_POST['category'] ?? '');
@@ -52,16 +49,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
     if ($title && !empty($category) && $quantity > 0 && $town) {
 
-        // ── Image Upload ───────────────────────────────────────────────────────
+        //--------------- Image Upload ----------------─────────
         $photo_path = null;
         if (!empty($_FILES['image']['name'])) {
             $file       = $_FILES['image'];
             $img_types  = ['image/jpeg','image/png','image/webp','image/gif'];
             $max_size   = 3 * 1024 * 1024; // 3 MB
             $upload_dir = __DIR__ . '/../assets/images/donations/';
-            if (!is_dir($upload_dir)) {
-                @mkdir($upload_dir, 0755, true);
-            }
 
             if (!in_array($file['type'], $img_types)) {
                 ajax_respond(false, 'Invalid image type. Allowed: JPG, PNG, WEBP, GIF.', $is_ajax);
@@ -74,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $filename = 'donation_' . uniqid() . '.' . $ext;
             $dest     = $upload_dir . $filename;
 
-            if (!@move_uploaded_file($file['tmp_name'], $dest)) {
+            if (!move_uploaded_file($file['tmp_name'], $dest)) {
                 ajax_respond(false, 'Image upload failed. Please try again.', $is_ajax);
             }
             $photo_path = 'assets/images/donations/' . $filename;
@@ -103,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// ── Handle POST: Delete Donation ──────────────────────────────────────────────
+//--------------- Handle POST: Delete Donation ----------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_donation') {
     $del_id = (int)($_POST['donation_id'] ?? 0);
     if ($del_id) {
@@ -133,12 +127,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit;
 }
 
-// ── Now that all POSTs are handled, output HTML ───────────────────────────────
+//--------------- Now that all POSTs are handled, output HTML ----------------────────
 $extra_css  = ['dashboard.css'];
 $page_title = 'Donor Dashboard';
 include_once "../includes/header.php";
 
-// ── Fetch Stats ───────────────────────────────────────────────────────────────
+//--------------- Fetch Stats ----------------─────────────────
 try {
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM donations WHERE donor_id = :id");
     $stmt->execute(['id' => $donor_id]);
@@ -148,7 +142,7 @@ try {
     $stmt->execute(['id' => $donor_id]);
     $available_count = $stmt->fetchColumn();
 
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM donations WHERE donor_id = :id AND status = 'not_available'");
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM donations WHERE donor_id = :id AND status = 'approved'");
     $stmt->execute(['id' => $donor_id]);
     $approved_count = $stmt->fetchColumn();
 
@@ -164,7 +158,7 @@ try {
     $total_donations  = $available_count = $approved_count = $pending_requests = 0;
 }
 
-// ── Fetch My Donations ────────────────────────────────────────────────────────
+//--------------- Fetch My Donations ----------------──────────
 try {
     $stmt = $pdo->prepare("
         SELECT donation_id, title, category, quantity, town, status, donated_at, description, img_url
@@ -179,18 +173,15 @@ try {
     $my_donations = [];
 }
 
-// ── Fetch Incoming Requests on My Donations ───────────────────────────────────
+//--------------- Fetch Incoming Requests on My Donations ----
 try {
     $stmt = $pdo->prepare("
-        SELECT dr.request_id, dr.quantity AS requested_quantity, d.title AS donation_title, d.category,
-               COALESCE(u.full_name, u2.full_name, 'Unknown Requester') AS recipient_name,
-               COALESCE(r.town, u.town, u2.town, '—') AS recipient_town,
+        SELECT dr.request_id, d.title AS donation_title, d.category,
+               u.full_name AS recipient_name, u.town AS recipient_town,
                dr.message, dr.status, dr.requested_at
         FROM donation_requests dr
-        JOIN donations d        ON dr.donation_id  = d.donation_id
-        LEFT JOIN recipients r  ON dr.recipient_id = r.recipient_id
-        LEFT JOIN users      u  ON r.user_id = u.user_id
-        LEFT JOIN users      u2 ON dr.recipient_id = u2.user_id
+        JOIN donations d  ON dr.donation_id  = d.donation_id
+        JOIN users     u  ON dr.recipient_id = u.user_id
         WHERE d.donor_id = :id
         ORDER BY dr.requested_at DESC
         LIMIT 15
@@ -204,17 +195,16 @@ try {
 // Helper: status badge CSS class
 function badge_class(string $status): string {
     return match($status) {
-        'available'     => 'badge-info',
-        'not_available' => 'badge-success',
-        'approved'      => 'badge-success',  // legacy fallback
-        'requested'     => 'badge-pending',
-        'rejected'      => 'badge-danger',
-        'pending'       => 'badge-pending',
-        default         => 'badge-info',
+        'available' => 'badge-info',
+        'approved'  => 'badge-success',
+        'requested' => 'badge-pending',
+        'rejected'  => 'badge-danger',
+        'pending'   => 'badge-pending',
+        default     => 'badge-info',
     };
 }
 
-// ── Fetch Dynamic Categories from Database ─────────────────────────────────────
+//--------------- Fetch Dynamic Categories from Database ----------------──────────────
 $default_cats = ['Food', 'Clothing', 'Education', 'Essential Needs'];
 try {
     $db_cats = $pdo->query("SELECT DISTINCT category FROM donations WHERE category IS NOT NULL AND category != ''")->fetchAll(PDO::FETCH_COLUMN);
@@ -300,7 +290,7 @@ try {
                                     <td><?php echo htmlspecialchars($d['town']); ?></td>
                                     <td>
                                         <span class="badge <?php echo badge_class($d['status']); ?>">
-                                            <?php echo $d['status'] === 'not_available' ? 'Not Available' : ucfirst($d['status']); ?>
+                                            <?php echo ucfirst($d['status']); ?>
                                         </span>
                                     </td>
                                     <td style="font-size:12px; color:#999;">
@@ -311,13 +301,13 @@ try {
                                         <div style="display:flex; gap:6px; align-items:center;">
                                             <a href="donation_edit.php?id=<?php echo $d['donation_id']; ?>"
                                                style="background:#e8f5e9; color:#2e7d32; text-decoration:none; padding:5px 10px; border-radius:6px; font-size:12px; cursor:pointer; font-weight:600; display:inline-block;">
-                                                ✏️ Edit
+                                                <i class="fa-solid fa-pen"></i> Edit
                                             </a>
                                             <form method="POST" onsubmit="return confirm('Remove this donation listing?');" style="display:inline;">
                                                 <input type="hidden" name="action"      value="delete_donation">
                                                 <input type="hidden" name="donation_id" value="<?php echo $d['donation_id']; ?>">
                                                 <button type="submit" style="background:#ffebee; color:#c62828; border:none; padding:5px 10px; border-radius:6px; font-size:12px; cursor:pointer; font-weight:600;">
-                                                    🗑 Remove
+                                                    <i class="fa-solid fa-trash"></i> Remove
                                                 </button>
                                             </form>
                                         </div>
@@ -358,7 +348,6 @@ try {
                                     <th>Item Requested</th>
                                     <th>Recipient</th>
                                     <th>Town</th>
-                                    <th>Qty</th>
                                     <th>Message</th>
                                     <th>Status</th>
                                     <th>Requested</th>
@@ -373,7 +362,6 @@ try {
                                     </td>
                                     <td><?php echo htmlspecialchars($r['recipient_name']); ?></td>
                                     <td><?php echo htmlspecialchars($r['recipient_town']); ?></td>
-                                    <td><strong><?php echo (int)($r['requested_quantity'] ?? 1); ?></strong></td>
                                     <td style="max-width:180px; font-size:12px; color:#777;">
                                         <?php echo $r['message'] ? htmlspecialchars(mb_strimwidth($r['message'], 0, 80, '…')) : '<em style="color:#ccc;">No message</em>'; ?>
                                     </td>
@@ -398,7 +386,7 @@ try {
         <div>
             <!-- Add Donation Form -->
             <div class="db-panel" id="add-donation-form">
-                <div class="db-panel-title">➕ Post a New Donation</div>
+                <div class="db-panel-title">Post a New Donation</div>
 
                 <form id="quick-donate-form" method="POST" action="donor_dashboard.php" enctype="multipart/form-data">
                     <input type="hidden" name="action" value="add_donation">
@@ -416,7 +404,7 @@ try {
                             <?php foreach ($categories as $cat): ?>
                                 <option value="<?php echo htmlspecialchars($cat); ?>"><?php echo cat_emoji($cat) . ' ' . htmlspecialchars($cat); ?></option>
                             <?php endforeach; ?>
-                            <option value="Other">➕ Other</option>
+                            <option value="Other">Other</option>
                         </select>
                     </div>
 
@@ -525,7 +513,7 @@ function clearDonationImage() {
     document.getElementById('dd_image_preview').style.display = 'none';
 }
 
-// ── AJAX donation form submission ─────────────────────────────────────────────
+//--------------- AJAX donation form submission ----------------──────────────────────
 document.getElementById('quick-donate-form').addEventListener('submit', function (e) {
     e.preventDefault();
 

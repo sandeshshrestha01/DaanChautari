@@ -5,7 +5,7 @@
  * Dedicated "Respond to Donations" view to approve or reject recipient requests.
  */
 
-// ── Bootstrap: DB & Config ───────────────────────────────────────────────────
+//--------------- Bootstrap: DB & Config ----------------─────
 require_once __DIR__ . '/../database/config.php';
 require_once __DIR__ . '/../database/db.php';
 
@@ -19,7 +19,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
 $admin_id   = (int)$_SESSION['user_id'];
 $page_title = 'Manage Donations';
 
-// ── 1. CSV Export Handler ─────────────────────────────────────────────────────
+//--------------- 1. CSV Export Handler ----------------───────
 if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     $export_tab = $_GET['tab'] ?? 'donations';
     $filename   = 'daan_chautari_' . ($export_tab === 'requests' ? 'donation_requests' : 'donations') . '_' . date('Y-m-d') . '.csv';
@@ -70,7 +70,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     exit;
 }
 
-// ── 2. POST Action Dispatcher ────────────────────────────────────────────────
+//--------------- 2. POST Action Dispatcher ----------------──
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     $action = $_POST['action'] ?? '';
 
@@ -320,13 +320,13 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     }
 }
 
-// ── 3. Determine Active Tab ──────────────────────────────────────────────────
+//--------------- 3. Determine Active Tab ----------------────
 $current_tab = $_GET['tab'] ?? (isset($_GET['filter']) && $_GET['filter'] === 'pending' ? 'requests' : 'donations');
 if (!in_array($current_tab, ['donations', 'requests'])) {
     $current_tab = 'donations';
 }
 
-// ── 4. Metric Statistics ─────────────────────────────────────────────────────
+//--------------- 4. Metric Statistics ----------------───────
 try {
     $total_donations      = (int)$pdo->query("SELECT COUNT(*) FROM donations")->fetchColumn();
     $available_donations  = (int)$pdo->query("SELECT COUNT(*) FROM donations WHERE status = 'available'")->fetchColumn();
@@ -344,7 +344,7 @@ try {
     $total_requests  = $pending_requests = $approved_requests = $rejected_requests = 0;
 }
 
-// ── 5. Trend Chart Data (Last 7, 14, or 30 days) ──────────────────────────────
+//--------------- 5. Trend Chart Data (Last 7, 14, or 30 days) ----------------───────
 $chart_days_limit = isset($_GET['days']) && in_array((int)$_GET['days'], [7, 14, 30]) ? (int)$_GET['days'] : 14;
 
 $don_trend_stmt = $pdo->prepare("
@@ -385,7 +385,7 @@ for ($i = $chart_days_limit - 1; $i >= 0; $i--) {
 $period_new_donations = array_sum($chart_don_data);
 $period_new_requests  = array_sum($chart_req_data);
 
-// ── 6. Category & Town Options for Filtering ─────────────────────────────────
+//--------------- 6. Category & Town Options for Filtering ----------------──────────
 $default_cats = ['Food', 'Clothing', 'Education', 'Essential Needs'];
 try {
     $db_cats = $pdo->query("SELECT DISTINCT category FROM donations WHERE category IS NOT NULL AND category != ''")->fetchAll(PDO::FETCH_COLUMN);
@@ -400,7 +400,7 @@ try {
     $town_options = [];
 }
 
-// ── 7. Fetch Records based on Active Tab ──────────────────────────────────────
+//--------------- 7. Fetch Records based on Active Tab ----------------───────────────
 $search_query    = trim($_GET['search'] ?? '');
 $category_filter = $_GET['category'] ?? 'all';
 $status_filter   = $_GET['status'] ?? (isset($_GET['filter']) && $_GET['filter'] === 'pending' ? 'pending' : 'all');
@@ -507,7 +507,7 @@ if ($current_tab === 'donations') {
     $requests_list = $stmt->fetchAll();
 }
 
-// ── 8. Include Layout Header ──────────────────────────────────────────────────
+//--------------- 8. Include Layout Header ----------------────
 require_once __DIR__ . '/admin_header.php';
 ?>
 
@@ -1332,7 +1332,7 @@ require_once __DIR__ . '/admin_header.php';
 
 <!-- ═══════════════════════ JAVASCRIPT & CHARTS ═══════════════════════ -->
 <script>
-// ── Trend Line Chart ─────────────────────────────────────────────────────────
+//--------------- Trend Line Chart ----------------───────────
 document.addEventListener('DOMContentLoaded', function() {
     const ctx = document.getElementById('donationsTrendChart');
     if (ctx) {
@@ -1393,7 +1393,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// ── Modals Handling ──────────────────────────────────────────────────────────
+//--------------- Modals Handling ----------------────────────
 function openViewModal(data) {
     document.getElementById('viewModalHeaderTitle').textContent = data.title || 'Donation Overview';
     document.getElementById('viewModalCategory').textContent    = data.category;
@@ -1487,7 +1487,7 @@ function closePhotoLightbox() {
     document.getElementById('photoLightboxModal').classList.remove('active');
 }
 
-// ── SweetAlert2 Confirmations ────────────────────────────────────────────────
+//--------------- SweetAlert2 Confirmations ----------------──
 function confirmDeleteDonation(id, title) {
     Swal.fire({
         title: 'Delete Donation?',

@@ -1,6 +1,6 @@
 :root {
   --primary-green: #2e7d32;
-  --dark-green: #1b5e20;
+  --dark-green: #1b3a1c;
   --primary-yellow: #f9a825;
   --label-yellow: #7a5900;
   --bg-light: #f5f5f5;
@@ -25,7 +25,7 @@ body {
 /* LEFT SIDE */
 .left {
     flex:1;
-    background:linear-gradient(135deg,var(--primary-green),var(--dark-green));
+    background:linear-gradient(135deg,var(--dark-green),var(--primary-green));
     color:var(--white);
     display:flex;
     flex-direction:column;
@@ -117,6 +117,65 @@ body {
     background:var(--white);
 }
 
+/* Password Input with Visibility Toggle */
+.password-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.password-input-wrap input {
+    width: 100%;
+    padding-right: 42px !important;
+    box-sizing: border-box;
+}
+
+.form .toggle-pw-btn,
+.password-input-wrap .toggle-pw-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    cursor: pointer;
+    color: #666666 !important;
+    padding: 4px !important;
+    width: auto !important;
+    height: auto !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    z-index: 2;
+}
+
+.form .toggle-pw-btn:hover,
+.form .toggle-pw-btn:focus,
+.form .toggle-pw-btn:active,
+.password-input-wrap .toggle-pw-btn:hover,
+.password-input-wrap .toggle-pw-btn:focus,
+.password-input-wrap .toggle-pw-btn:active {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    color: #222222 !important;
+}
+
+.password-input-wrap .toggle-pw-btn svg {
+    display: block;
+    pointer-events: none;
+    stroke: currentColor;
+}
+
+
 /* Role toggle (Donor / Recipient) */
 .role-toggle {
     display: flex;
@@ -173,7 +232,8 @@ body {
     cursor: pointer;
 }
 
-.form button {
+.form button[type="submit"],
+.form button:not(.toggle-pw-btn) {
     padding:12px;
     border:none;
     border-radius:8px;
@@ -183,7 +243,8 @@ body {
     font-size:16px;
 }
 
-.form button:hover {
+.form button[type="submit"]:hover,
+.form button:not(.toggle-pw-btn):hover {
     background:var(--dark-green);
 }
 

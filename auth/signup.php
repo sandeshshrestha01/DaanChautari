@@ -48,12 +48,28 @@ include_once "../includes/header.php";
 
             <div class="form-group">
                 <label for="password">Password <span class="req">*</span></label>
-                <input type="password" id="password" name="password" placeholder="Min. 6 characters" required>
+                <div class="password-input-wrap">
+                    <input type="password" id="password" name="password" placeholder="Min. 6 characters" required autocomplete="new-password">
+                    <button type="button" class="toggle-pw-btn" data-target="password" aria-label="Toggle password visibility">
+                        <svg class="eye-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <div class="form-group">
                 <label for="confirm_password">Confirm Password <span class="req">*</span></label>
-                <input type="password" id="confirm_password" name="confirm_password" placeholder="Repeat password" required>
+                <div class="password-input-wrap">
+                    <input type="password" id="confirm_password" name="confirm_password" placeholder="Repeat password" required autocomplete="new-password">
+                    <button type="button" class="toggle-pw-btn" data-target="confirm_password" aria-label="Toggle confirm password visibility">
+                        <svg class="eye-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <div class="form-check">
@@ -74,29 +90,6 @@ include_once "../includes/header.php";
 
 </div>
 
-
-
-<script>
-(function () {
-    var cards = document.querySelectorAll('.role-card');
-
-    // Mark the currently-checked radio's card as active on load
-    document.querySelectorAll('input[name="role"]').forEach(function (radio) {
-        if (radio.checked) {
-            var card = document.getElementById('card-' + radio.value);
-            if (card) card.classList.add('active');
-        }
-    });
-
-    // Toggle active class when any card is clicked
-    cards.forEach(function (card) {
-        card.addEventListener('click', function () {
-            cards.forEach(function (c) { c.classList.remove('active'); });
-            card.classList.add('active');
-        });
-    });
-}());
-</script>
-
+<script src="<?php echo BASE_URL; ?>assets/js/auth.js" defer></script>
 </body>
 </html>

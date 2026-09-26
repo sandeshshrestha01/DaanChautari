@@ -168,7 +168,7 @@ if (isset($_SESSION['user_id'])) {
     </header>
 
     <?php
-    // ── Global SweetAlert2 flash renderer ─────────────────────────────────────
+    //--------------- Global SweetAlert2 flash renderer ----------------──────────────
     $flash = get_flash_message();
     if ($flash):
         $icon    = htmlspecialchars($flash['type'],    ENT_QUOTES);

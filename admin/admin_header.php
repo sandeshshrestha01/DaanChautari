@@ -19,6 +19,18 @@ $admin_name    = $_SESSION['user_name'] ?? 'Administrator';
 $admin_initial = strtoupper(substr($admin_name, 0, 1));
 $page_title    = $page_title ?? 'Dashboard';
 
+$admin_photo = null;
+if (!empty($_SESSION['user_id'])) {
+    try {
+        $a_stmt = $pdo->prepare("SELECT profile_photo FROM users WHERE user_id = :id");
+        $a_stmt->execute(['id' => $_SESSION['user_id']]);
+        $a_row = $a_stmt->fetch();
+        if (!empty($a_row['profile_photo']) && file_exists(__DIR__ . '/../' . ltrim($a_row['profile_photo'], '/'))) {
+            $admin_photo = BASE_URL . htmlspecialchars(ltrim($a_row['profile_photo'], '/'));
+        }
+    } catch (PDOException $e) {}
+}
+
 $flash = get_flash_message();
 
 // Count pending requests for sidebar badge
@@ -210,7 +222,11 @@ if (!function_exists('item_photo_src')) {
                 <div class="topbar-name"><?php echo htmlspecialchars($admin_name); ?></div>
                 <div class="topbar-role">System Administrator</div>
             </div>
-            <div class="admin-ava"><?php echo $admin_initial; ?></div>
+            <?php if ($admin_photo): ?>
+                <img src="<?php echo $admin_photo; ?>" alt="<?php echo htmlspecialchars($admin_name); ?>" class="admin-ava">
+            <?php else: ?>
+                <div class="admin-ava"><?php echo $admin_initial; ?></div>
+            <?php endif; ?>
         </div>
     </div>
 

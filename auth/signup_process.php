@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// ── Collect & sanitize inputs ────────────────────────────────────────────────
+//--------------- Collect & sanitize inputs ----------------──
 $full_name        = trim(filter_input(INPUT_POST, 'fullname',         FILTER_SANITIZE_SPECIAL_CHARS) ?? '');
 $email            = trim(filter_input(INPUT_POST, 'email',            FILTER_VALIDATE_EMAIL) ?? '');
 $password         = $_POST['password']         ?? '';
@@ -26,7 +26,7 @@ $address          = trim(filter_input(INPUT_POST, 'address',          FILTER_SAN
 // All new users start as 'donor'. They can switch in the dashboard.
 $role = 'donor';
 
-// ── Validate required fields ─────────────────────────────────────────────────
+//--------------- Validate required fields ----------------───
 if (empty($full_name) || !$email || empty($password) || empty($town) || empty($phone) || empty($address)) {
     set_flash_message('error', 'Please fill in all required fields.');
     header("Location: signup.php");
@@ -45,7 +45,7 @@ if (strlen($password) < 6) {
     exit;
 }
 
-// ── Database operations ───────────────────────────────────────────────────────
+//--------------- Database operations ----------------─────────
 try {
     // Check if email already registered
     $stmt = $pdo->prepare("SELECT user_id FROM users WHERE email = :email");
@@ -78,7 +78,7 @@ try {
 
     $user_id = $pdo->lastInsertId();
 
-    // ── Auto-login: set session variables ────────────────────────────────────
+    //--------------- Auto-login: set session variables ----------------─────────────
     $_SESSION['user_id']    = $user_id;
     $_SESSION['user_name']  = $full_name;
     $_SESSION['user_email'] = $email;

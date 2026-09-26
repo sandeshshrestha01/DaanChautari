@@ -179,26 +179,28 @@ include_once __DIR__ . '/../includes/header.php';
             </a>
         </div>
 
-        <form method="POST" action="profile.php" enctype="multipart/form-data" class="profile-form-wrap">
+        <div class="profile-form-wrap">
             
             <!-- Left Side: Profile Image Upload -->
             <div class="profile-left-col">
-                <div class="profile-avatar-wrapper">
-                    <div class="profile-avatar-circle">
-                        <img id="profile_avatar_preview" 
-                             src="<?php echo !empty($user['profile_photo']) ? BASE_URL . htmlspecialchars($user['profile_photo']) : ''; ?>" 
-                             alt="Avatar" 
-                             class="profile-avatar-img"
-                             style="<?php echo empty($user['profile_photo']) ? 'display: none;' : ''; ?>">
-                        <span id="profile_initials_preview" style="<?php echo !empty($user['profile_photo']) ? 'display: none;' : ''; ?>">
-                            <?php echo htmlspecialchars(strtoupper(substr($user['full_name'], 0, 1))); ?>
-                        </span>
+                <form method="POST" action="profile.php" enctype="multipart/form-data" id="profileForm">
+                    <div class="profile-avatar-wrapper">
+                        <div class="profile-avatar-circle">
+                            <img id="profile_avatar_preview" 
+                                 src="<?php echo !empty($user['profile_photo']) ? BASE_URL . htmlspecialchars($user['profile_photo']) : ''; ?>" 
+                                 alt="Avatar" 
+                                 class="profile-avatar-img"
+                                 style="<?php echo empty($user['profile_photo']) ? 'display: none;' : ''; ?>">
+                            <span id="profile_initials_preview" style="<?php echo !empty($user['profile_photo']) ? 'display: none;' : ''; ?>">
+                                <?php echo htmlspecialchars(strtoupper(substr($user['full_name'], 0, 1))); ?>
+                            </span>
+                        </div>
+                        <label for="profile_image_input" class="profile-avatar-upload-btn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                        </label>
+                        <input type="file" id="profile_image_input" name="profile_image" accept="image/jpeg,image/png,image/webp,image/gif" class="profile-file-input" onchange="previewAvatar(this)">
                     </div>
-                    <label for="profile_image_input" class="profile-avatar-upload-btn">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                    </label>
-                    <input type="file" id="profile_image_input" name="profile_image" accept="image/jpeg,image/png,image/webp,image/gif" class="profile-file-input" onchange="previewAvatar(this)">
-                </div>
+                </form>
 
                 <div class="profile-user-name">
                     <?php echo htmlspecialchars($user['full_name']); ?>
@@ -211,7 +213,7 @@ include_once __DIR__ . '/../includes/header.php';
                     Support files: JPG, PNG, WEBP, GIF. Max file size: 3MB.
                 </div>
 
-                <!-- Profile Page Role Switcher Card -->
+                <!-- Profile Page Role Switcher Card (separate form, outside profile form) -->
                 <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] !== 'admin'): ?>
                 <div class="profile-role-switcher-card">
                     <div class="profile-role-switcher-title">
@@ -242,28 +244,28 @@ include_once __DIR__ . '/../includes/header.php';
                 <div class="profile-form-row">
                     <div class="profile-form-group">
                         <label class="profile-field-label">Full Name <span class="req">*</span></label>
-                        <input type="text" name="fullname" value="<?php echo htmlspecialchars($user['full_name']); ?>" required class="profile-field-input">
+                        <input type="text" name="fullname" form="profileForm" value="<?php echo htmlspecialchars($user['full_name']); ?>" required class="profile-field-input">
                     </div>
                     <div class="profile-form-group">
                         <label class="profile-field-label">Email Address <span class="req">*</span></label>
-                        <input type="email" name="email" value="<?php echo htmlspecialchars($user['email']); ?>" required class="profile-field-input">
+                        <input type="email" name="email" form="profileForm" value="<?php echo htmlspecialchars($user['email']); ?>" required class="profile-field-input">
                     </div>
                 </div>
 
                 <div class="profile-form-row">
                     <div class="profile-form-group">
                         <label class="profile-field-label">Phone Number <span class="req">*</span></label>
-                        <input type="text" name="phone" value="<?php echo htmlspecialchars($user['phone']); ?>" required class="profile-field-input">
+                        <input type="text" name="phone" form="profileForm" value="<?php echo htmlspecialchars($user['phone']); ?>" required class="profile-field-input">
                     </div>
                     <div class="profile-form-group">
                         <label class="profile-field-label">Town / City <span class="req">*</span></label>
-                        <input type="text" name="town" value="<?php echo htmlspecialchars($user['town']); ?>" required class="profile-field-input">
+                        <input type="text" name="town" form="profileForm" value="<?php echo htmlspecialchars($user['town']); ?>" required class="profile-field-input">
                     </div>
                 </div>
 
                 <div class="profile-form-group-full">
                     <label class="profile-field-label">Detailed Address <span class="req">*</span></label>
-                    <input type="text" name="address" value="<?php echo htmlspecialchars($user['address']); ?>" required placeholder="e.g. House No, Street, Ward No" class="profile-field-input">
+                    <input type="text" name="address" form="profileForm" value="<?php echo htmlspecialchars($user['address']); ?>" required placeholder="e.g. House No, Street, Ward No" class="profile-field-input">
                 </div>
 
                 <h3 class="profile-sec-title">Security Settings</h3>
@@ -271,19 +273,19 @@ include_once __DIR__ . '/../includes/header.php';
                 <div class="profile-form-row">
                     <div class="profile-form-group">
                         <label class="profile-field-label">New Password <span class="profile-field-hint">(leave blank to keep current)</span></label>
-                        <input type="password" name="password" placeholder="Min. 6 characters" class="profile-field-input">
+                        <input type="password" name="password" form="profileForm" placeholder="Min. 6 characters" class="profile-field-input">
                     </div>
                     <div class="profile-form-group">
                         <label class="profile-field-label">Confirm New Password</label>
-                        <input type="password" name="confirm_password" placeholder="Repeat new password" class="profile-field-input">
+                        <input type="password" name="confirm_password" form="profileForm" placeholder="Repeat new password" class="profile-field-input">
                     </div>
                 </div>
 
-                <button type="submit" class="profile-save-btn">
+                <button type="submit" form="profileForm" class="profile-save-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="16" height="16" fill="currentColor"><path d="M64 80c-8.8 0-16 7.2-16 16l0 320c0 8.8 7.2 16 16 16l320 0c8.8 0 16-7.2 16-16l0-242.7c0-4.2-1.7-8.3-4.7-11.3L320 86.6 320 176c0 17.7-14.3 32-32 32l-160 0c-17.7 0-32-14.3-32-32l0-96-32 0zm80 0l0 80 128 0 0-80-128 0zM0 96C0 60.7 28.7 32 64 32l242.7 0c17 0 33.3 6.7 45.3 18.7L429.3 128c12 12 18.7 28.3 18.7 45.3L448 416c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96zM160 320a64 64 0 1 1 128 0 64 64 0 1 1 -128 0z"/></svg> Save Changes
                 </button>
             </div>
-        </form>
+        </div>
     </div>
 </div>
 

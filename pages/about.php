@@ -4,7 +4,7 @@ $page_title = 'About Us';
 include_once "../includes/header.php";
 ?>
 
-<!-- ─── PAGE HERO ─── -->
+<!-- --------PAGE HERO -- -->
 <section class="page-hero">
     <div class="page-hero-inner">
         <div class="eyebrow"><span class="dot"></span> Our Story</div>
@@ -13,7 +13,7 @@ include_once "../includes/header.php";
     </div>
 </section>
 
-<!-- ─── MISSION / VISION / VALUES ─── -->
+<!-- --------MISSION / VISION / VALUES ---------->
 <section class="section">
     <div class="about-mvv-grid">
         <div class="mvv-card green">
@@ -34,7 +34,7 @@ include_once "../includes/header.php";
     </div>
 </section>
 
-<!-- ─── OUR STORY ─── -->
+<!-- --------OUR STORY ---------->
 <section class="section section-bg">
     <div class="about-story-wrapper">
         <div class="about-story-text">
@@ -80,7 +80,7 @@ include_once "../includes/header.php";
     </div>
 </section>
 
-<!-- ─── TEAM SECTION ─── -->
+<!-- --------TEAM SECTION ---------->
 <section class="section">
     <div class="section-header">
         <h2>Meet Our Team</h2>
@@ -108,7 +108,7 @@ include_once "../includes/header.php";
     </div>
 </section>
 
-<!-- ─── CTA ─── -->
+<!-- --------CTA ---------->
 <section class="section">
     <div class="volunteer-cta">
         <div class="volunteer-cta-text">
