@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($user) {
                 // Generate random 6-digit OTP
                 $otp = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-                $expiry = date('Y-m-d H:i:s', strtotime('+10 minutes'));
+                $expiry = date('Y-m-d H:i:s', strtotime('+2 minutes'));//2 menutes 
 
                 // Save OTP to DB
                 $update = $pdo->prepare("UPDATE users SET reset_otp = :otp, otp_expiry = :expiry WHERE user_id = :id");

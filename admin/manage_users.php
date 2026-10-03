@@ -590,6 +590,7 @@ require_once __DIR__ . '/admin_header.php';
                         <th>Status</th>
                         <th>Applied On</th>
                         <th style="text-align: right;">Actions</th>
+                        <th> <input type="checkbox" id="selectAll"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -701,6 +702,9 @@ require_once __DIR__ . '/admin_header.php';
                                     </svg>
                                 </button>
                             </div>
+                        </td>
+                        <td>
+                            <input type="checkbox" class="volunteer-checkbox" data-vol-id="<?php echo $vol['volunteer_id']; ?>">
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -1357,6 +1361,31 @@ function confirmDeleteVolunteer(volId, volName) {
         }
     });
 }
+
+    const selectAll = document.getElementById("selectAll");
+    const checkboxes = document.querySelectorAll(".volunteer-checkbox");
+
+    // Select / deselect all
+    selectAll.addEventListener("change", function () {
+        checkboxes.forEach(function (checkbox) {
+            checkbox.checked = selectAll.checked;
+        });
+    });
+
+    // Check individual checkboxes
+    checkboxes.forEach(function (checkbox) {
+        checkbox.addEventListener("change", function () {
+
+            // Check if ALL checkboxes are selected
+            const allSelected = [...checkboxes].every(function (checkbox) {
+                return checkbox.checked;
+            });
+
+            // Select All becomes unchecked if even one is unchecked
+            selectAll.checked = allSelected;//false/true
+        });
+    });
 </script>
+
 
 <?php require_once __DIR__ . '/admin_footer.php'; ?>

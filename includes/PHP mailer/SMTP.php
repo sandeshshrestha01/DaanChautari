@@ -671,10 +671,11 @@ class SMTP
                     if (!$this->sendCommand('OAuth TOKEN', $oauth, [235, 334])) {
                         return false;
                     }
-                    //If the server answers with 334, send an empty line and wait for a 235
+                    //If the server answers with 334, send an empty line
+                    //a reply other than a 235 means the authentication failed, so we don't need to send anything else
                     if (
-                        substr($this->last_reply, 0, 3) === '334'
-                        && $this->sendCommand('AUTH End', '', 235)
+                        strpos($this->last_reply, '334') === 0
+                        && !$this->sendCommand('AUTH End', '', 235)
                     ) {
                         return false;
                     }

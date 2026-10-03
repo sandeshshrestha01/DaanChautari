@@ -35,12 +35,12 @@ $mail = new PHPMailer(true);
 
 try {
     //Server settings
-    $mail->SMTPDebug = SMTP::DEBUG_OFF;                    //Enable verbose debug output
+                   //Enable verbose debug output
     $mail->isSMTP();                                            //Send using SMTP
     $mail->Host       = 'smtp.gmail.com';                     //Set the SMTP server to send through
     $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
     $mail->Username   = 'sandeshcrest7@gmail.com';                     //SMTP username
-    $mail->Password   = 'lqbj trig wtru bbep';                               //SMTP password
+    $mail->Password   = 'qmfd wgaw sovb praj';                               //SMTP password
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
     $mail->Port       = 465;                                    //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
 
@@ -88,7 +88,7 @@ try {
 }
 ?>
 
-<!-- --------PAGE HERO ---------->
+<!-- ─── PAGE HERO ─── -->
 <section class="page-hero">
     <div class="page-hero-inner">
         <div class="eyebrow"><span class="dot"></span> Get In Touch</div>
@@ -97,7 +97,7 @@ try {
     </div>
 </section>
 
-<!-- --------CONTACT CONTENT ---------->
+<!-- ─── CONTACT CONTENT ─── -->
 <section class="section">
     <div class="contact-wrapper">
 
@@ -203,7 +203,7 @@ try {
     </div>
 </section>
 
-<!-- --------MAP / COMMUNITY PRESENCE ---------->
+<!-- ─── MAP / COMMUNITY PRESENCE ─── -->
 <section class="section section-bg">
     <div class="section-header">
         <h2>Our Community Reach</h2>

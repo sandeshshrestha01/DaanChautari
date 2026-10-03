@@ -30,7 +30,7 @@ function send_otp_email(string $recipient_email, string $recipient_name, string 
         $mail->Host       = 'smtp.gmail.com';
         $mail->SMTPAuth   = true;
         $mail->Username   = 'sandeshcrest7@gmail.com';
-        $mail->Password   = 'lqbj trig wtru bbep';
+        $mail->Password   = 'qmfd wgaw sovb praj';
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
         $mail->Port       = 465;
 
@@ -55,7 +55,8 @@ function send_otp_email(string $recipient_email, string $recipient_name, string 
                 <div style=\"text-align: center; margin: 30px 0;\">
                     <span style=\"font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #1b5e20; background: #e8f5e9; padding: 12px 28px; border-radius: 8px; border: 1px dashed #2e7d32; display: inline-block;\">" . htmlspecialchars($otp) . "</span>
                 </div>
-                <p style=\"font-size: 14px; color: #d32f2f; margin-bottom: 10px;\">⏱️ This OTP code is valid for <strong>10 minutes</strong>.</p>
+                <p style=\"font-size: 15px; color: #555; line-height: 1.5;\">Please Do Not Share This OTP With Anyone. It is confidential and should be used only by you.</p>
+                <p style=\"font-size: 14px; color: #d32f2f; margin-bottom: 10px;\">This OTP code is valid for <strong>2 minutes</strong>.</p>
                 <p style=\"font-size: 13px; color: #777;\">If you did not request a password reset, please ignore this email or contact support if you have concerns.</p>
             </div>
             <div style=\"text-align: center; margin-top: 20px; font-size: 12px; color: #888;\">
@@ -63,7 +64,7 @@ function send_otp_email(string $recipient_email, string $recipient_name, string 
             </div>
         </div>";
 
-        $mail->AltBody = "Namaste {$recipient_name},\n\nYour 6-digit password reset OTP is: {$otp}\n\nThis OTP is valid for 10 minutes.\n\nIf you did not request this, please ignore this message.";
+        $mail->AltBody = "Namaste {$recipient_name},\n\nYour 6-digit password reset OTP is: {$otp}\n\nThis OTP is valid for 2 minutes.\n\nIf you did not request this, please ignore this message.";
 
         return $mail->send();
     } catch (Exception $e) {
