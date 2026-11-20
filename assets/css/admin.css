@@ -1823,7 +1823,6 @@ img.u-ava, .u-ava-img {
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 

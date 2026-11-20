@@ -8,6 +8,7 @@
 //--------------- Handle POST & CSV Export BEFORE any HTML output ----------------───
 require_once __DIR__ . '/../database/config.php';
 require_once __DIR__ . '/../database/db.php';
+require_once __DIR__ . '/../includes/mailer.php';
 
 // Auth Guard: Admin only
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
@@ -209,6 +210,35 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         header("Location: manage_users.php?role=volunteer");
         exit;
     }
+    // Action: Send message to selected volunteers
+if ($action === 'send_volunteer_message') {
+    $ids     = array_filter(array_map('intval', $_POST['volunteer_ids'] ?? []));
+    $subject = trim($_POST['subject'] ?? '');
+    $message = trim($_POST['message'] ?? '');
+
+    if (empty($ids)) {
+        $_SESSION['vol_msg_result'] = ['icon' => 'warning', 'title' => 'No volunteer selected.'];
+    } elseif ($subject === '' || $message === '') {
+        $_SESSION['vol_msg_result'] = ['icon' => 'warning', 'title' => 'Subject and message are required.'];
+    } else {
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $q = $pdo->prepare("SELECT full_name, email FROM volunteers WHERE volunteer_id IN ($placeholders)");
+        $q->execute(array_values($ids));
+
+        $sent = 0; $failed = 0;
+        foreach ($q->fetchAll() as $v) {
+            if (empty($v['email']) || !filter_var($v['email'], FILTER_VALIDATE_EMAIL)) { $failed++; continue; }
+            send_volunteer_message($v['email'], $v['full_name'], $subject, $message) ? $sent++ : $failed++;
+        }
+
+        $_SESSION['vol_msg_result'] = $sent > 0
+            ? ['icon' => 'success', 'title' => "Message sent to $sent volunteer" . ($sent > 1 ? 's' : '') . ($failed ? " ($failed failed)" : '') . '.']
+            : ['icon' => 'error',   'title' => 'Message could not be sent.'];
+    }
+    header("Location: manage_users.php?role=volunteer");
+    exit;
+}
+
 }
 
 //--------------- 3. Overview Metrics & Statistics ----------------──────────────────
@@ -574,6 +604,15 @@ require_once __DIR__ . '/admin_header.php';
                 Registered Platform Users (<?php echo ucfirst($role_filter === 'all' ? 'All Roles' : $role_filter); ?>)
             <?php endif; ?>
         </h3>
+        <?php if ($is_volunteer_view): ?>
+        <button type="button" class="btn btn-primary btn-sm" onclick="openMessageModal()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            Message <span id="selectedCount" style="opacity:.85;">(0)</span>
+        </button>
+    <?php endif; ?>
+
     </div>
 
     <div class="dtbl-wrap">
@@ -911,7 +950,7 @@ require_once __DIR__ . '/admin_header.php';
     </div>
 </div>
 
-<!-- ═══════════════════════ MODAL: ADD NEW USER ═══════════════════════ -->
+<!-- ========== MODAL: ADD NEW USER ========== -->
 <div class="admin-modal-overlay" id="addUserModal" onclick="closeModalOnBackdrop(event, 'addUserModal')">
     <div class="admin-modal-card">
         <div class="admin-modal-hdr">
@@ -987,7 +1026,7 @@ require_once __DIR__ . '/admin_header.php';
     </div>
 </div>
 
-<!-- ═══════════════════════ MODAL: USER DETAILS ═══════════════════════ -->
+<!-- =========== MODAL: USER DETAILS ========== -->
 <div class="admin-modal-overlay" id="userDetailsModal" onclick="closeModalOnBackdrop(event, 'userDetailsModal')">
     <div class="admin-modal-card">
         <div class="admin-modal-hdr">
@@ -1073,7 +1112,7 @@ require_once __DIR__ . '/admin_header.php';
     </div>
 </div>
 
-<!-- ═══════════════════════ MODAL: CHANGE ROLE ═══════════════════════ -->
+<!-- ====== MODAL: CHANGE ROLE ======= -->
 <div class="admin-modal-overlay" id="changeRoleModal" onclick="closeModalOnBackdrop(event, 'changeRoleModal')">
     <div class="admin-modal-card" style="max-width: 440px;">
         <div class="admin-modal-hdr">
@@ -1104,6 +1143,36 @@ require_once __DIR__ . '/admin_header.php';
             <div class="admin-modal-foot">
                 <button type="button" class="btn btn-outline" onclick="closeModal('changeRoleModal')">Cancel</button>
                 <button type="submit" class="btn btn-primary">Update Role</button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- ========= MODAL: MESSAGE VOLUNTEERS ====== -->
+<div class="admin-modal-overlay" id="messageModal" onclick="closeModalOnBackdrop(event, 'messageModal')">
+    <div class="admin-modal-card" style="max-width: 520px;">
+        <div class="admin-modal-hdr">
+            <h3>Message Volunteers</h3>
+            <button type="button" class="admin-modal-close" onclick="closeModal('messageModal')">&times;</button>
+        </div>
+        <form method="POST" action="manage_users.php" id="messageForm">
+            <input type="hidden" name="action" value="send_volunteer_message">
+            <div id="messageIdsContainer"></div>
+            <div class="admin-modal-body">
+                <p style="font-size:13px; color:#555; margin-bottom:12px;">
+                    Sending to <strong id="messageRecipientCount">0</strong> selected volunteer(s).
+                </p>
+                <div class="form-group">
+                    <label class="form-label">Subject <span class="req">*</span></label>
+                    <input type="text" name="subject" class="form-control" placeholder="e.g. Join our volunteer camp" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Message <span class="req">*</span></label>
+                    <textarea name="message" class="form-control" rows="6" placeholder="Write your message..." required></textarea>
+                </div>
+            </div>
+            <div class="admin-modal-foot">
+                <button type="button" class="btn btn-outline" onclick="closeModal('messageModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="sendMsgBtn">Send Message</button>
             </div>
         </form>
     </div>
@@ -1300,6 +1369,7 @@ function openChangeRoleModal(userId, userName, currentRole) {
     document.getElementById('changeRoleModal').classList.add('active');
 }
 
+
 function closeModal(modalId) {
     document.getElementById(modalId).classList.remove('active');
 }
@@ -1362,29 +1432,70 @@ function confirmDeleteVolunteer(volId, volName) {
     });
 }
 
-    const selectAll = document.getElementById("selectAll");
-    const checkboxes = document.querySelectorAll(".volunteer-checkbox");
+   //--------------- Volunteer selection + messaging ---------------
+const selectAll  = document.getElementById("selectAll");
+const checkboxes = document.querySelectorAll(".volunteer-checkbox");
 
-    // Select / deselect all
+function updateSelectedCount() {
+    const n = [...checkboxes].filter(c => c.checked).length;
+    const badge = document.getElementById('selectedCount');
+    if (badge) badge.innerText = '(' + n + ')';
+    if (selectAll) selectAll.checked = (checkboxes.length > 0 && n === checkboxes.length);
+}
+
+if (selectAll) {
     selectAll.addEventListener("change", function () {
-        checkboxes.forEach(function (checkbox) {
-            checkbox.checked = selectAll.checked;
-        });
+        checkboxes.forEach(c => c.checked = selectAll.checked);
+        updateSelectedCount();
+    });
+    checkboxes.forEach(c => c.addEventListener("change", updateSelectedCount));
+}
+
+function openMessageModal() {
+    const selected = [...checkboxes].filter(c => c.checked);
+    if (selected.length === 0) {
+        Swal.fire({ icon: 'info', title: 'Select volunteers first',
+                    text: 'Tick one or more volunteers (or "select all") to send a message.',
+                    confirmButtonColor: '#2e7d32' });
+        return;
+    }
+    const container = document.getElementById('messageIdsContainer');
+    container.innerHTML = '';
+    selected.forEach(c => {
+        const input = document.createElement('input');
+        input.type  = 'hidden';
+        input.name  = 'volunteer_ids[]';
+        input.value = c.dataset.volId;
+        container.appendChild(input);
+    });
+    document.getElementById('messageRecipientCount').innerText = selected.length;
+    document.getElementById('messageModal').classList.add('active');
+}
+
+// Disable button while sending (Gmail SMTP can take a few seconds)
+const msgForm = document.getElementById('messageForm');
+if (msgForm) {
+    msgForm.addEventListener('submit', function () {
+        const btn = document.getElementById('sendMsgBtn');
+        btn.disabled = true;
+        btn.innerText = 'Sending...';
+    });
+}
+<?php if (!empty($_SESSION['vol_msg_result'])):
+    $r = $_SESSION['vol_msg_result'];
+    unset($_SESSION['vol_msg_result']); ?>
+
+    Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: <?php echo json_encode($r['icon']); ?>,
+        title: <?php echo json_encode($r['title']); ?>,
+        showConfirmButton: false,
+        timer: 3500,
+        timerProgressBar: true
     });
 
-    // Check individual checkboxes
-    checkboxes.forEach(function (checkbox) {
-        checkbox.addEventListener("change", function () {
-
-            // Check if ALL checkboxes are selected
-            const allSelected = [...checkboxes].every(function (checkbox) {
-                return checkbox.checked;
-            });
-
-            // Select All becomes unchecked if even one is unchecked
-            selectAll.checked = allSelected;//false/true
-        });
-    });
+<?php endif; ?>
 </script>
 
 
