@@ -9,7 +9,7 @@
 
 require_once __DIR__ . '/config.php';
 
-//--------------- Connect WITHOUT a specific database first so we can CREATE it---------------───────────
+//--------------- Connect WITHOUT a specific database first so we can CREATE it----------------------------────
 $host    = 'localhost';
 $user    = 'root';
 $pass    = 'sandesh';
@@ -31,7 +31,7 @@ try {
     die("❌ Connection failed: " . $e->getMessage());
 }
 
-//--------------- Table definitions ----------------───────────
+//--------------- Table definitions -----------------------------────
 $tables = [];
 
 // 1. USERS TABLE (Unified — Donors, Recipients & Admins)
@@ -170,7 +170,7 @@ CREATE TABLE IF NOT EXISTS activity_logs (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ";
 
-//--------------- Run migrations ----------------──────────────
+//--------------- Run migrations ------------------------------------------
 $results = [];
 
 foreach ($tables as $table_name => $sql) {
@@ -182,7 +182,7 @@ foreach ($tables as $table_name => $sql) {
     }
 }
 
-//--------------- Check & migrate column photo -> img_url in donations table---------------───────────
+//--------------- Check & migrate column photo -> img_url in donations table----------------------------────
 try {
     $cols = $pdo->query("SHOW COLUMNS FROM donations LIKE 'photo'")->fetchAll();
     if (!empty($cols)) {
@@ -199,7 +199,7 @@ try {
     $results[] = ['table' => 'donations (column update)', 'status' => 'error', 'msg' => $e->getMessage()];
 }
 
-//--------------- Seed default admin into users table (only if no admin exists)---------------──────────
+//--------------- Seed default admin into users table (only if no admin exists)----------------------------───
 $admin_count = (int) $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'admin'")->fetchColumn();
 if ($admin_count === 0) {
     try {
@@ -217,7 +217,7 @@ if ($admin_count === 0) {
     $results[] = ['table' => 'users (admin seed)', 'status' => 'skip', 'msg' => 'Admin user already exists, skipped'];
 }
 
-//--------------- CLI output ----------------──────────────────
+//--------------- CLI output ------------------------------------------────
 if (php_sapi_name() === 'cli') {
     echo "\n Dan Chautari — Migration Results\n";
     echo " Database: $db_name\n";

@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    //--------------- 4. Admin Login Spinner & Submit Handler ----------------───────────
+    //--------------- 4. Admin Login Spinner & Submit Handler -----------------------------────
     const adminLoginForm = document.getElementById('adminLoginForm');
     if (adminLoginForm) {
         adminLoginForm.addEventListener('submit', function () {

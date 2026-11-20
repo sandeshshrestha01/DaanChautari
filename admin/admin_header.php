@@ -111,7 +111,7 @@ if (!function_exists('item_photo_src')) {
 </head>
 <body class="admin-body">
 
-<!-- ═══════════════════════════ SIDEBAR ═══════════════════════════ -->
+<!-- ----------- SIDEBAR ----------- -->
 <aside class="admin-sidebar" id="adminSidebar">
 
     <div class="sidebar-brand">
@@ -205,7 +205,7 @@ if (!function_exists('item_photo_src')) {
     </div>
 </aside>
 
-<!-- ═══════════════════════════ MAIN ═══════════════════════════ -->
+<!-- ----------- MAIN ----------- -->
 <div class="admin-main">
 
     <!-- Top Bar -->

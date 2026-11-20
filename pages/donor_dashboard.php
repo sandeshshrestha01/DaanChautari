@@ -33,7 +33,7 @@ function ajax_respond(bool $ok, string $msg, bool $is_ajax): void {
     exit;
 }
 
-//--------------- Handle POST: Add New Donation ----------------──────────────────────
+//--------------- Handle POST: Add New Donation -------------------------------------------------------─
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_donation') {
     $title       = trim($_POST['title']    ?? '');
     $category    = trim($_POST['category'] ?? '');
@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
     if ($title && !empty($category) && $quantity > 0 && $town) {
 
-        //--------------- Image Upload ----------------─────────
+        //--------------- Image Upload -----------------------------──
         $photo_path = null;
         if (!empty($_FILES['image']['name'])) {
             $file       = $_FILES['image'];
@@ -127,12 +127,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit;
 }
 
-//--------------- Now that all POSTs are handled, output HTML ----------------────────
+//--------------- Now that all POSTs are handled, output HTML -----------------------------─
 $extra_css  = ['dashboard.css'];
 $page_title = 'Donor Dashboard';
 include_once "../includes/header.php";
 
-//--------------- Fetch Stats ----------------─────────────────
+//--------------- Fetch Stats ------------------------------------------───
 try {
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM donations WHERE donor_id = :id");
     $stmt->execute(['id' => $donor_id]);
@@ -158,7 +158,7 @@ try {
     $total_donations  = $available_count = $approved_count = $pending_requests = 0;
 }
 
-//--------------- Fetch My Donations ----------------──────────
+//--------------- Fetch My Donations -----------------------------───
 try {
     $stmt = $pdo->prepare("
         SELECT donation_id, title, category, quantity, town, status, donated_at, description, img_url
@@ -204,7 +204,7 @@ function badge_class(string $status): string {
     };
 }
 
-//--------------- Fetch Dynamic Categories from Database ----------------──────────────
+//--------------- Fetch Dynamic Categories from Database ------------------------------------------
 $default_cats = ['Food', 'Clothing', 'Education', 'Essential Needs'];
 try {
     $db_cats = $pdo->query("SELECT DISTINCT category FROM donations WHERE category IS NOT NULL AND category != ''")->fetchAll(PDO::FETCH_COLUMN);
@@ -216,7 +216,7 @@ try {
 
 <div class="dashboard-wrapper" style="padding-top: 100px;">
 
-    <!-- ══ HEADER BANNER ══════════════════════════════════════════════════════ -->
+    <!-- ══ HEADER BANNER ----------------------════════ -->
     <div class="db-header-banner">
         <div class="db-header-text">
             <h2>Welcome back, <?php echo htmlspecialchars($donor_name);?>!</h2>
@@ -228,7 +228,7 @@ try {
         </div>
     </div>
 
-    <!-- ══ STAT CARDS ═════════════════════════════════════════════════════════ -->
+    <!-- ══ STAT CARDS ------------------------------------ -->
     <div class="db-metrics-grid">
         <div class="db-stat-card">
             <div class="db-stat-number"><?php echo $total_donations; ?></div>
@@ -248,7 +248,7 @@ try {
         </div>
     </div>
 
-    <!-- ══ MAIN 2-COLUMN GRID ════════════════════════════════════════════════ -->
+    <!-- ══ MAIN 2-COLUMN GRID ----------------------══ -->
     <div class="db-content-grid">
 
         <!-- LEFT: My Donations Table -->
@@ -513,7 +513,7 @@ function clearDonationImage() {
     document.getElementById('dd_image_preview').style.display = 'none';
 }
 
-//--------------- AJAX donation form submission ----------------──────────────────────
+//--------------- AJAX donation form submission -------------------------------------------------------─
 document.getElementById('quick-donate-form').addEventListener('submit', function (e) {
     e.preventDefault();
 

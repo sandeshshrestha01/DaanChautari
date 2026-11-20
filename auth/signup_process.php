@@ -45,7 +45,7 @@ if (strlen($password) < 6) {
     exit;
 }
 
-//--------------- Database operations ----------------─────────
+//--------------- Database operations -----------------------------──
 try {
     // Check if email already registered
     $stmt = $pdo->prepare("SELECT user_id FROM users WHERE email = :email");
@@ -78,7 +78,7 @@ try {
 
     $user_id = $pdo->lastInsertId();
 
-    //--------------- Auto-login: set session variables ----------------─────────────
+    //--------------- Auto-login: set session variables -----------------------------──────
     $_SESSION['user_id']    = $user_id;
     $_SESSION['user_name']  = $full_name;
     $_SESSION['user_email'] = $email;
