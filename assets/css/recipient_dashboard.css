@@ -1,7 +1,7 @@
-/*--------------------------------------------------------------
+/*----------------------------------
  * Daan Chautari — Recipient Dashboard Dedicated Stylesheet
  * Handles recipient layout grid, metric stats, donation item cards, filters, and tables.
- --------------------------------------------------------------*/
+ ----------------------------------*/
 
 .recipient-page-wrap {
   padding-top: 100px;
@@ -495,9 +495,9 @@
   margin-top: 20px;
 }
 
-/* ------------------------------------------─
+/* ----------------------------─
    Browse Donations - Horizontal Flex Wrap Card Layout & Pagination
-   -----------------------------─────--------*/
+   ---------------─────--------*/
 
 .browse-cards-grid {
   display: flex;
@@ -762,9 +762,9 @@
   margin: 0;
 }
 
-/* ------------------------------------------─
+/* ----------------------------─
    See More & See Less Pagination Controls
-   -----------------------------─────--------*/
+   ---------------─────--------*/
 
 .browse-pagination-bar {
   display: flex;

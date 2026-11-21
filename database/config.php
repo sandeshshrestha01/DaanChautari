@@ -31,7 +31,7 @@ if (!defined('BASE_URL')) {
     define('BASE_URL', $base_url);
 }
 
-//--------------- Flash message helpers -----------------------------
+//--------------- Flash message helpers ---------------
 
 /**
  * Store a one-time flash message in the session.
@@ -55,7 +55,7 @@ function get_flash_message(): ?array {
     return null;
 }
 
-//--------------- Global Helper: Category emoji -------------------------------------------------------─
+//--------------- Global Helper: Category emoji ---------------------------─
 if (!function_exists('cat_emoji')) {
     function cat_emoji(string $cat): string {
         return match($cat) {

@@ -5,7 +5,7 @@
 
 document.addEventListener('DOMContentLoaded', function () {
 
-    //--------------- 1. Animated Stats Counter (Homepage) -----------------------------──────
+    //--------------- 1. Animated Stats Counter (Homepage) ---------------──────
     const counters = document.querySelectorAll(".stat-number");
     if (counters.length > 0) {
         counters.forEach(function (counter) {
@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    //--------------- 2. Donation Image Preview Handler ------------------------------------------──
+    //--------------- 2. Donation Image Preview Handler ----------------------------──
     const dnImageInput = document.getElementById('dn_image');
     if (dnImageInput) {
         dnImageInput.addEventListener('change', function () {

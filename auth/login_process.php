@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-//--------------- Collect inputs ------------------------------------------
+//--------------- Collect inputs ----------------------------
 $email    = trim(filter_input(INPUT_POST, 'email',    FILTER_VALIDATE_EMAIL) ?? '');
 $password = $_POST['password'] ?? '';
 $form_role = $_POST['role']    ?? ''; // 'donor' or 'recipient' (optional field in login form)
@@ -25,7 +25,7 @@ if (!$email || empty($password)) {
     exit;
 }
 
-//--------------- Database lookup -----------------------------──────
+//--------------- Database lookup ---------------──────
 try {
     $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email AND status = 'active'");
     $stmt->execute(['email' => $email]);
@@ -47,7 +47,7 @@ try {
             exit;
         }
 
-        //--------------- Establish session for regular users (donor/recipient)----------------------------───
+        //--------------- Establish session for regular users (donor/recipient)--------------───
         session_regenerate_id(true);
         $_SESSION['user_id']    = $user['user_id'];
         $_SESSION['user_name']  = $user['full_name'];

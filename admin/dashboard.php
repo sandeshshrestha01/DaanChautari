@@ -4,7 +4,7 @@
  * Overview stats, recent donations table, donation requests, quick actions, recent activity.
  */
 
-//--------------- Handle POST BEFORE any output -------------------------------------------------------─
+//--------------- Handle POST BEFORE any output ---------------------------─
 require_once __DIR__ . '/../database/config.php';
 require_once __DIR__ . '/../database/db.php';
 
@@ -78,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_request'])) {
 $page_title = 'Dashboard';
 require_once __DIR__ . '/admin_header.php';
 
-//--------------- Fetch Stats ------------------------------------------───
+//--------------- Fetch Stats ----------------------------───
 try {
     $total_donations = (int)$pdo->query("SELECT COUNT(*) FROM donations")->fetchColumn();
     $pending_req     = (int)$pdo->query("SELECT COUNT(*) FROM donation_requests WHERE status = 'pending'")->fetchColumn();
@@ -161,7 +161,7 @@ try {
 
 ?>
 
-<!----------------- Dashboard Header -----------------------------─────---------->
+<!----------------- Dashboard Header ---------------─────---------->
 <div class="dash-header">
     <div>
         <h2 class="dash-title">Dashboard</h2>
@@ -169,7 +169,7 @@ try {
     </div>
 </div>
 
-<!----------------- Stat Cards ------------------------------------------───---------->
+<!----------------- Stat Cards ----------------------------───---------->
 <div class="dash-stats">
     <div class="dstat-card dstat-green">
         <div class="dstat-icon">🎁</div>
@@ -201,7 +201,7 @@ try {
     </div>
 </div>
 
-<!----------------- Main Content Grid -----------------------------────---------->
+<!----------------- Main Content Grid ---------------────---------->
 <div class="dash-grid">
 
     <!-- Left Column -->
@@ -429,10 +429,10 @@ try {
 
 </div><!-- /.dash-grid -->
 
-<!----------------- Chart.js Scripts -----------------------------─────---------->
+<!----------------- Chart.js Scripts ---------------─────---------->
 <script>
 (function() {
-    //--------------- Line Chart: Donations over last 7 days----------------------------────
+    //--------------- Line Chart: Donations over last 7 days--------------────
     const lineCtx = document.getElementById('donationsLineChart');
     if (lineCtx) {
         const labels = <?php echo json_encode($chart_labels); ?>;
@@ -492,7 +492,7 @@ try {
         });
     }
 
-    //--------------- Pie Chart: Request Status Breakdown-----------------------------------------
+    //--------------- Pie Chart: Request Status Breakdown---------------------------
     const pieCtx = document.getElementById('requestsPieChart');
     if (pieCtx) {
         const statusData = <?php echo json_encode([

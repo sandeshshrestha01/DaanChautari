@@ -9,7 +9,7 @@ $extra_css  = ['volunteer.css'];
 $page_title = 'Become a Volunteer';
 require __DIR__ . '/../includes/header.php';
 
-// --------Handle POST ------------------------------------------──
+// --------Handle POST ----------------------------──
 $submitted   = false;
 $errors      = [];
 $vol_ref     = '';
@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $skills       = trim($_POST['skills']       ?? '');
     $availability = trim($_POST['availability'] ?? '');
 
-    //--------------- Validation ------------------------------------------
+    //--------------- Validation ----------------------------
     if (empty($full_name))    $errors[] = 'Full name is required.';
     if (empty($phone))        $errors[] = 'Phone number is required.';
     if (empty($town))         $errors[] = 'Town / City is required.';
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $errors[] = 'Phone number must be 7–15 digits.';
     }
 
-    //--------------- Insert ------------------------------------------────
+    //--------------- Insert ----------------------------────
     if (empty($errors)) {
         try {
             $stmt = $pdo->prepare("
@@ -382,7 +382,7 @@ $old = $_POST ?? [];
 
 <!-- --------SCRIPT: Skills Tags + Availability ---------->
 <script>
-//--------------- SKILLS TAG SYSTEM -----------------------------────
+//--------------- SKILLS TAG SYSTEM ---------------────
 const skillsWrap    = document.getElementById('skillsTagsWrap');
 const skillsInput   = document.getElementById('skillsTagInput');
 const skillsHidden  = document.getElementById('vf_skills_value');
@@ -512,7 +512,7 @@ document.querySelectorAll('.vf-group input, .vf-group select, .vf-group textarea
     el.addEventListener('input', () => el.classList.remove('invalid'));
 });
 
-//--------------- HELPERS -------------------------------------------------------
+//--------------- HELPERS ---------------------------
 function escHtml(str) {
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }

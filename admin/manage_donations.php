@@ -511,7 +511,7 @@ if ($current_tab === 'donations') {
 require_once __DIR__ . '/admin_header.php';
 ?>
 
-<!-- ═══════════════════════ PAGE HEADER ═══════════════════════ -->
+<!-- --------------------------------------------- PAGE HEADER --------------------------------------------- -->
 <div class="dash-header">
     <div>
         <h2 class="dash-title">
@@ -537,7 +537,7 @@ require_once __DIR__ . '/admin_header.php';
     </div>
 </div>
 
-<!-- ═══════════════════════ STAT CARDS ═══════════════════════ -->
+<!-- --------------------------------------------- STAT CARDS --------------------------------------------- -->
 <div class="dash-stats">
     <div class="dstat-card dstat-green">
         <div class="dstat-icon">🎁</div>
@@ -577,7 +577,7 @@ require_once __DIR__ . '/admin_header.php';
     </div>
 </div>
 
-<!-- ═══════════════════════ TREND CHART PANEL ═══════════════════════ -->
+<!-- --------------------------------------------- TREND CHART PANEL --------------------------------------------- -->
 <div class="dash-panel" style="margin-bottom: 24px;">
     <div class="dpanel-hdr" style="flex-wrap: wrap; gap: 12px;">
         <div>
@@ -630,7 +630,7 @@ require_once __DIR__ . '/admin_header.php';
     </div>
 </div>
 
-<!-- ═══════════════════════ NAVIGATION TABS ═══════════════════════ -->
+<!-- --------------------------------------------- NAVIGATION TABS --------------------------------------------- -->
 <div class="user-tabs-bar">
     <div class="user-tabs">
         <a href="manage_donations.php?tab=donations"
@@ -666,9 +666,9 @@ require_once __DIR__ . '/admin_header.php';
 </div>
 
 <?php if ($current_tab === 'donations'): ?>
-<!-- ═══════════════════════════════════════════════════════════════
+<!-- --------------------
      TAB 1: MANAGE DONATIONS
-     ═══════════════════════════════════════════════════════════════ -->
+     -------------------- -->
 
 <!-- Filter & Search Card -->
 <form method="GET" action="manage_donations.php" class="user-filter-card">
@@ -712,7 +712,7 @@ require_once __DIR__ . '/admin_header.php';
             <option value="all">All Towns</option>
             <?php foreach ($town_options as $t): ?>
                 <option value="<?php echo htmlspecialchars($t); ?>" <?php echo $town_filter === $t ? 'selected' : ''; ?>>
-                    📍 <?php echo htmlspecialchars($t); ?>
+                 <i class="fa-solid fa-location-pin"></i> <?php echo htmlspecialchars($t); ?>
                 </option>
             <?php endforeach; ?>
         </select>
@@ -758,7 +758,7 @@ require_once __DIR__ . '/admin_header.php';
                     $img_src       = item_photo_src($don['img_url'] ?? '', BASE_URL);
                     $badge_class   = status_badge($don['status']);
                     $cat_cls       = cat_badge($don['category']);
-                    $cat_ico       = cat_emoji($don['category']);
+                   
                     $total_qty     = (int)$don['quantity'];
                     $approved_qty  = (int)$don['approved_qty'];
                     $remaining_qty = max(0, $total_qty - $approved_qty);
@@ -797,11 +797,11 @@ require_once __DIR__ . '/admin_header.php';
                 <tr>
                     <!-- Thumbnail -->
                     <td>
-                        <div class="don-thumb-wrap" onclick="viewPhoto('<?php echo htmlspecialchars($img_src, ENT_QUOTES); ?>', '<?php echo htmlspecialchars($don['title'], ENT_QUOTES); ?>')">
+                        <div class="don-thumb-wrap" >
                             <?php if (!empty($img_src)): ?>
-                                <img src="<?php echo htmlspecialchars($img_src); ?>" alt="<?php echo htmlspecialchars($don['title']); ?>" class="don-thumb-img" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'don-thumb-placeholder\'><?php echo $cat_ico; ?></div>';">
+                                <img src="<?php echo htmlspecialchars($img_src); ?>" alt="<?php echo htmlspecialchars($don['title']); ?>" class="don-thumb-img">
                             <?php else: ?>
-                                <div class="don-thumb-placeholder"><?php echo $cat_ico; ?></div>
+                                <div class="don-thumb-placeholder"><?php echo "img" ?></div>
                             <?php endif; ?>
                         </div>
                     </td>
@@ -813,7 +813,7 @@ require_once __DIR__ . '/admin_header.php';
                                 <?php echo htmlspecialchars($don['title']); ?>
                             </a>
                             <span class="badge <?php echo $cat_cls; ?>" style="font-size:10.5px; padding:2px 7px; margin-top:3px;">
-                                <?php echo $cat_ico . ' ' . htmlspecialchars($don['category']); ?>
+                                <?php echo  htmlspecialchars($don['category']); ?>
                             </span>
                         </div>
                     </td>
@@ -834,7 +834,7 @@ require_once __DIR__ . '/admin_header.php';
                     <!-- Location -->
                     <td>
                         <span style="display:inline-flex; align-items:center; gap:4px; font-size:12.5px;">
-                            📍 <?php echo htmlspecialchars($don['town']); ?>
+                         <i class="fa-solid fa-location-pin"></i> <?php echo htmlspecialchars($don['town']); ?>
                         </span>
                     </td>
 
@@ -913,9 +913,9 @@ require_once __DIR__ . '/admin_header.php';
 </div>
 
 <?php else: ?>
-<!-- ═══════════════════════════════════════════════════════════════
+<!-- 
      TAB 2: RESPOND TO DONATIONS (Donation Requests)
-     ═══════════════════════════════════════════════════════════════ -->
+     -------------------- -->
 
 <?php if ($filter_don_id > 0): ?>
 <div style="background: #e3f2fd; border: 1px solid #bbdefb; border-radius: 10px; padding: 12px 18px; margin-bottom: 20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
@@ -1029,7 +1029,7 @@ require_once __DIR__ . '/admin_header.php';
                                     <?php echo htmlspecialchars($req['recipient_name']); ?>
                                 </div>
                                 <div style="font-size: 11.5px; color: var(--muted);">
-                                    <i class="fa-solid fa-map-pin"></i> <?php echo htmlspecialchars($req['recipient_town']); ?>
+                                     <i class="fa-solid fa-location-pin"></i><?php echo htmlspecialchars($req['recipient_town']); ?>
                                     <?php if (!empty($req['recipient_phone']) && $req['recipient_phone'] !== '—'): ?>
                                         &nbsp;•&nbsp;📞<?php echo htmlspecialchars($req['recipient_phone']); ?>
                                     <?php endif; ?>
@@ -1163,7 +1163,7 @@ require_once __DIR__ . '/admin_header.php';
 
 <?php endif; ?>
 
-<!-- ═══════════════════════ MODAL: VIEW DONATION DETAILS ═══════════════════════ -->
+<!--  MODAL: VIEW DONATION DETAILS --------------------------------------------- -->
 <div class="admin-modal-overlay" id="viewDonationModal">
     <div class="admin-modal-card" style="max-width: 620px;">
         <div class="admin-modal-hdr">
@@ -1233,7 +1233,7 @@ require_once __DIR__ . '/admin_header.php';
     </div>
 </div>
 
-<!-- ═══════════════════════ MODAL: EDIT DONATION ═══════════════════════ -->
+<!-- --------------------------------------------- MODAL: EDIT DONATION --------------------------------------------- -->
 <div class="admin-modal-overlay" id="editDonationModal">
     <div class="admin-modal-card" style="max-width: 580px;">
         <div class="admin-modal-hdr">
@@ -1322,7 +1322,7 @@ require_once __DIR__ . '/admin_header.php';
     </div>
 </div>
 
-<!-- ═══════════════════════ MODAL: IMAGE LIGHTBOX ═══════════════════════ -->
+<!-- --------------------------------------------- MODAL: IMAGE LIGHTBOX --------------------------------------------- -->
 <div class="admin-modal-overlay" id="photoLightboxModal" onclick="closePhotoLightbox()">
     <div style="max-width: 90vw; max-height: 90vh; position: relative; text-align:center;">
         <img id="lightboxImg" src="" alt="Enlarged Item" style="max-width: 100%; max-height: 85vh; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.4);">
@@ -1330,7 +1330,7 @@ require_once __DIR__ . '/admin_header.php';
     </div>
 </div>
 
-<!-- ═══════════════════════ JAVASCRIPT & CHARTS ═══════════════════════ -->
+<!-- --------------------------------------------- JAVASCRIPT & CHARTS --------------------------------------------- -->
 <script>
 //--------------- Trend Line Chart ----------------───────────
 document.addEventListener('DOMContentLoaded', function() {

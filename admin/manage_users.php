@@ -20,7 +20,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
 $current_admin_id = (int)$_SESSION['user_id'];
 $page_title       = 'Manage Users';
 
-//--------------- 1. CSV Export Handler -----------------------------
+//--------------- 1. CSV Export Handler ---------------
 if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     $export_role = $_GET['role'] ?? 'all';
     $filename    = 'daan_chautari_' . ($export_role === 'volunteer' ? 'volunteers' : 'users') . '_' . date('Y-m-d') . '.csv';
@@ -241,7 +241,7 @@ if ($action === 'send_volunteer_message') {
 
 }
 
-//--------------- 3. Overview Metrics & Statistics ------------------------------------------────
+//--------------- 3. Overview Metrics & Statistics ----------------------------────
 $total_users      = (int)$pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
 $total_donors     = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE role = 'donor'")->fetchColumn();
 $total_recipients = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE role = 'recipient'")->fetchColumn();
@@ -251,7 +251,7 @@ $pending_vols     = (int)$pdo->query("SELECT COUNT(*) FROM volunteers WHERE stat
 $active_users     = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE status = 'active'")->fetchColumn();
 $active_rate      = $total_users > 0 ? round(($active_users / $total_users) * 100) : 100;
 
-//--------------- 4. Line Chart Data Preparation ------------------------------------------──────
+//--------------- 4. Line Chart Data Preparation ----------------------------──────
 // Time range: 7, 14, or 30 days
 $chart_days_limit = isset($_GET['days']) && in_array((int)$_GET['days'], [7, 14, 30]) ? (int)$_GET['days'] : 14;
 
@@ -322,7 +322,7 @@ for ($i = $chart_days_limit - 1; $i >= 0; $i--) {
 $period_new_users = array_sum($chart_total_data);
 $period_new_vols  = array_sum($chart_vol_data);
 
-//--------------- 5. Filtering & Querying Records ------------------------------------------─────
+//--------------- 5. Filtering & Querying Records ----------------------------─────
 $role_filter   = $_GET['role']   ?? 'all';
 $status_filter = $_GET['status'] ?? 'all';
 $search_query  = trim($_GET['search'] ?? '');
@@ -386,7 +386,7 @@ if ($is_volunteer_view) {
     $volunteers_list = [];
 }
 
-//--------------- 6. Include Admin Layout Header ------------------------------------------──────
+//--------------- 6. Include Admin Layout Header ----------------------------──────
 require_once __DIR__ . '/admin_header.php';
 ?>
 
@@ -752,7 +752,7 @@ require_once __DIR__ . '/admin_header.php';
             </table>
 
         <?php else: ?>
-            <!-- --------Registered Users Table -----------------------------──---------->
+            <!-- --------Registered Users Table ---------------──---------->
             <table class="dash-table">
                 <thead>
                     <tr>
@@ -1315,7 +1315,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-//--------------- Modal Helpers ------------------------------------------─
+//--------------- Modal Helpers ----------------------------─
 function openAddUserModal() {
     document.getElementById('addUserModal').classList.add('active');
 }
@@ -1380,7 +1380,7 @@ function closeModalOnBackdrop(event, modalId) {
     }
 }
 
-//--------------- SweetAlert Confirmation Prompts ------------------------------------------──────
+//--------------- SweetAlert Confirmation Prompts ----------------------------──────
 function confirmToggleStatus(userId, actionType, userName) {
     const isAct = (actionType === 'activate');
     Swal.fire({
