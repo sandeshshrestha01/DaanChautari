@@ -712,7 +712,7 @@ require_once __DIR__ . '/admin_header.php';
             <option value="all">All Towns</option>
             <?php foreach ($town_options as $t): ?>
                 <option value="<?php echo htmlspecialchars($t); ?>" <?php echo $town_filter === $t ? 'selected' : ''; ?>>
-                    📍 <?php echo htmlspecialchars($t); ?>
+                 <i class="fa-solid fa-location-pin"></i> <?php echo htmlspecialchars($t); ?>
                 </option>
             <?php endforeach; ?>
         </select>
@@ -758,7 +758,7 @@ require_once __DIR__ . '/admin_header.php';
                     $img_src       = item_photo_src($don['img_url'] ?? '', BASE_URL);
                     $badge_class   = status_badge($don['status']);
                     $cat_cls       = cat_badge($don['category']);
-                    $cat_ico       = cat_emoji($don['category']);
+                   
                     $total_qty     = (int)$don['quantity'];
                     $approved_qty  = (int)$don['approved_qty'];
                     $remaining_qty = max(0, $total_qty - $approved_qty);
@@ -797,11 +797,11 @@ require_once __DIR__ . '/admin_header.php';
                 <tr>
                     <!-- Thumbnail -->
                     <td>
-                        <div class="don-thumb-wrap" onclick="viewPhoto('<?php echo htmlspecialchars($img_src, ENT_QUOTES); ?>', '<?php echo htmlspecialchars($don['title'], ENT_QUOTES); ?>')">
+                        <div class="don-thumb-wrap" >
                             <?php if (!empty($img_src)): ?>
-                                <img src="<?php echo htmlspecialchars($img_src); ?>" alt="<?php echo htmlspecialchars($don['title']); ?>" class="don-thumb-img" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'don-thumb-placeholder\'><?php echo $cat_ico; ?></div>';">
+                                <img src="<?php echo htmlspecialchars($img_src); ?>" alt="<?php echo htmlspecialchars($don['title']); ?>" class="don-thumb-img">
                             <?php else: ?>
-                                <div class="don-thumb-placeholder"><?php echo $cat_ico; ?></div>
+                                <div class="don-thumb-placeholder"><?php echo "img" ?></div>
                             <?php endif; ?>
                         </div>
                     </td>
@@ -813,7 +813,7 @@ require_once __DIR__ . '/admin_header.php';
                                 <?php echo htmlspecialchars($don['title']); ?>
                             </a>
                             <span class="badge <?php echo $cat_cls; ?>" style="font-size:10.5px; padding:2px 7px; margin-top:3px;">
-                                <?php echo $cat_ico . ' ' . htmlspecialchars($don['category']); ?>
+                                <?php echo  htmlspecialchars($don['category']); ?>
                             </span>
                         </div>
                     </td>
@@ -834,7 +834,7 @@ require_once __DIR__ . '/admin_header.php';
                     <!-- Location -->
                     <td>
                         <span style="display:inline-flex; align-items:center; gap:4px; font-size:12.5px;">
-                            📍 <?php echo htmlspecialchars($don['town']); ?>
+                         <i class="fa-solid fa-location-pin"></i> <?php echo htmlspecialchars($don['town']); ?>
                         </span>
                     </td>
 
@@ -1029,7 +1029,7 @@ require_once __DIR__ . '/admin_header.php';
                                     <?php echo htmlspecialchars($req['recipient_name']); ?>
                                 </div>
                                 <div style="font-size: 11.5px; color: var(--muted);">
-                                    <i class="fa-solid fa-map-pin"></i> <?php echo htmlspecialchars($req['recipient_town']); ?>
+                                     <i class="fa-solid fa-location-pin"></i><?php echo htmlspecialchars($req['recipient_town']); ?>
                                     <?php if (!empty($req['recipient_phone']) && $req['recipient_phone'] !== '—'): ?>
                                         &nbsp;•&nbsp;📞<?php echo htmlspecialchars($req['recipient_phone']); ?>
                                     <?php endif; ?>

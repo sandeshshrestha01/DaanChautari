@@ -381,7 +381,7 @@ function badge_class(string $status): string {
                                         📦 Qty <?php echo $rem_qty; ?> · <?php echo htmlspecialchars($item['category']); ?>
                                     </div>
                                     <div class="recipient-item-info">
-                                        📍 <?php echo htmlspecialchars($item['town']); ?>
+                                     <i class="fa-solid fa-location-pin"></i> <?php echo htmlspecialchars($item['town']); ?>
                                     </div>
                                 </div>
 
